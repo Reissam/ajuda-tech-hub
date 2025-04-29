@@ -29,6 +29,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -76,6 +77,7 @@ const NewTicket = () => {
         throw new Error("Usuário não autenticado");
       }
 
+      // Pass clientId in the addTicket function
       addTicket({
         title,
         description,
@@ -83,7 +85,7 @@ const NewTicket = () => {
         priority,
         category,
         createdBy: user.id,
-        clientId: selectedClient,
+        clientId: selectedClient, // This is correctly passed now
       });
 
       toast.success("Chamado aberto com sucesso!");
@@ -117,44 +119,46 @@ const NewTicket = () => {
             <PopoverContent className="w-[240px] p-0">
               <Command>
                 <CommandInput placeholder="Buscar cliente..." />
-                <CommandEmpty>
-                  <div className="flex flex-col items-center p-2">
-                    <p className="text-sm">Nenhum cliente encontrado</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => navigate("/clients/new")}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Novo Cliente
-                    </Button>
-                  </div>
-                </CommandEmpty>
-                <CommandGroup>
-                  {mockClients.map((client) => (
-                    <CommandItem
-                      key={client.id}
-                      value={client.name}
-                      onSelect={() => {
-                        setSelectedClient(client.id);
-                        setSelectedClientName(client.name);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          selectedClient === client.id ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      <div className="flex flex-col">
-                        <span>{client.name}</span>
-                        <span className="text-xs text-muted-foreground">{client.unit}</span>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                <CommandList>
+                  <CommandEmpty>
+                    <div className="flex flex-col items-center p-2">
+                      <p className="text-sm">Nenhum cliente encontrado</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => navigate("/clients/new")}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Novo Cliente
+                      </Button>
+                    </div>
+                  </CommandEmpty>
+                  <CommandGroup>
+                    {mockClients.map((client) => (
+                      <CommandItem
+                        key={client.id}
+                        value={client.name}
+                        onSelect={() => {
+                          setSelectedClient(client.id);
+                          setSelectedClientName(client.name);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedClient === client.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <div className="flex flex-col">
+                          <span>{client.name}</span>
+                          <span className="text-xs text-muted-foreground">{client.unit}</span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
