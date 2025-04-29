@@ -59,7 +59,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           content: comment.content,
           createdAt: new Date(comment.created_at),
           createdBy: comment.created_by,
-          attachments: comment.attachments
+          attachments: comment.attachments ? (Array.isArray(comment.attachments) ? comment.attachments : [comment.attachments.toString()]) 
         })) : []
       }));
 
@@ -86,6 +86,8 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Usuário não autenticado");
       }
 
+      console.log("Enviando dados do ticket para o Supabase:", ticketData);
+
       // Inserir novo ticket no Supabase
       const { data, error } = await supabase
         .from('tickets')
@@ -102,8 +104,11 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         .single();
       
       if (error) {
+        console.error("Erro detalhado do Supabase:", error);
         throw error;
       }
+
+      console.log("Ticket criado com sucesso:", data);
 
       // Adicionar o novo ticket ao estado local
       const newTicket: Ticket = {
@@ -209,7 +214,7 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         content: data.content,
         createdAt: new Date(data.created_at),
         createdBy: data.created_by,
-        attachments: data.attachments
+        attachments: data.attachments ? (Array.isArray(data.attachments) ? data.attachments : [data.attachments.toString()])
       };
 
       // Atualizar estado local

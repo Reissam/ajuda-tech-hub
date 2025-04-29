@@ -21,6 +21,8 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const fetchClients = async () => {
       try {
+        setIsLoading(true);
+        
         const { data, error } = await supabase
           .from('clients')
           .select('*');
@@ -30,16 +32,17 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Transformar os dados para o formato esperado pela aplicação
-        const clientsData: Client[] = data.map(client => ({
+        const clientsData: Client[] = data ? data.map(client => ({
           id: client.id,
           name: client.name,
           unit: client.unit,
           address: client.address,
           city: client.city,
           state: client.state
-        }));
+        })) : [];
 
         setClients(clientsData);
+        console.log("Clientes carregados:", clientsData);
       } catch (error) {
         console.error('Erro ao carregar clientes:', error);
         toast.error('Erro ao carregar clientes');
@@ -53,6 +56,13 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
 
   const addClient = async (clientData: Omit<Client, "id">) => {
     try {
+      console.log("Enviando dados do cliente para o Supabase:", clientData);
+      
+      // Verificar se todos os campos necessários estão presentes
+      if (!clientData.name || !clientData.unit || !clientData.address || !clientData.city || !clientData.state) {
+        throw new Error("Todos os campos são obrigatórios");
+      }
+
       const { data, error } = await supabase
         .from('clients')
         .insert([clientData])
@@ -60,8 +70,11 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         .single();
       
       if (error) {
+        console.error("Erro detalhado do Supabase:", error);
         throw error;
       }
+
+      console.log("Cliente cadastrado com sucesso:", data);
 
       const newClient: Client = {
         id: data.id,

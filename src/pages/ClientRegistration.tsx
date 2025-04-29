@@ -29,10 +29,10 @@ import { useForm } from "react-hook-form";
 // Schema de validação
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  address: z.string().optional(),
-  state: z.string().optional(),
-  city: z.string().optional(),
-  unit: z.string().optional(),
+  address: z.string().min(1, "Endereço é obrigatório"),
+  state: z.string().min(1, "Estado é obrigatório"),
+  city: z.string().min(1, "Cidade é obrigatória"),
+  unit: z.string().min(1, "Unidade é obrigatória"),
 });
 
 type ClientFormValues = z.infer<typeof formSchema>;
@@ -64,13 +64,15 @@ const ClientRegistration = () => {
   const onSubmit = async (data: ClientFormValues) => {
     setIsSubmitting(true);
     try {
+      console.log("Dados do formulário:", data);
+      
       // Usar a função addClient do contexto
-      addClient({
+      await addClient({
         name: data.name,
-        unit: data.unit || "",
-        address: data.address || "",
-        city: data.city || "",
-        state: data.state || ""
+        unit: data.unit,
+        address: data.address,
+        city: data.city,
+        state: data.state
       });
       
       // Redireciona para a lista de clientes
