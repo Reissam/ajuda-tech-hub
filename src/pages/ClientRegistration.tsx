@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -27,11 +26,9 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
-// Schema de validação
+// Schema de validação - removendo email e senha
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
   address: z.string().optional(),
   state: z.string().optional(),
   city: z.string().optional(),
@@ -41,7 +38,7 @@ const formSchema = z.object({
 type ClientFormValues = z.infer<typeof formSchema>;
 
 const ClientRegistration = () => {
-  const { user, register } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -49,8 +46,6 @@ const ClientRegistration = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
-      password: "",
       address: "",
       state: "",
       city: "",
@@ -59,8 +54,8 @@ const ClientRegistration = () => {
   });
 
   // Verificação se o usuário tem permissão para acessar essa página
-  if (user?.role !== UserRole.ADMIN) {
-    // Se não for admin, redireciona para o dashboard
+  if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.MANAGER) {
+    // Se não for admin ou gestor, redireciona para o dashboard
     navigate("/dashboard");
     return null;
   }
@@ -68,9 +63,8 @@ const ClientRegistration = () => {
   const onSubmit = async (data: ClientFormValues) => {
     setIsSubmitting(true);
     try {
-      // Registra o cliente com informações básicas
-      await register(data.name, data.email, data.password);
-      
+      // Em um ambiente real, aqui você enviaria os dados para a API
+      // Como não temos mais o processo de autenticação, apenas simulamos o registro
       toast.success("Cliente cadastrado com sucesso!");
       
       // Redireciona para o dashboard
@@ -93,72 +87,40 @@ const ClientRegistration = () => {
         <CardHeader>
           <CardTitle>Informações do Cliente</CardTitle>
           <CardDescription>
-            Preencha todos os campos para cadastrar um novo cliente no sistema.
+            Preencha os campos para cadastrar um novo cliente no sistema.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome do Cliente</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Nome completo" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="email@exemplo.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Senha</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="********" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Unidade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ex: Matriz, Filial 1, etc" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome do Cliente</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="unit"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Unidade</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Matriz, Filial 1, etc" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}

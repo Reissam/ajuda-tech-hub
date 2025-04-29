@@ -1,14 +1,24 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
+import { toast } from "sonner";
+import {
+  Plus,
+  Search,
+  ArrowUpDown,
+  MoreHorizontal,
+  Trash2,
+  UserCog,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -25,28 +35,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { toast } from "sonner";
-import { Search, UserPlus } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-// Mock users para demonstração
-const MOCK_USERS = [
-  {
-    id: "1",
-    name: "Cliente Demo",
-    email: "cliente@demo.com",
-    role: UserRole.CLIENT,
-    active: true,
-    createdAt: new Date("2023-01-15"),
-  },
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  active: boolean;
+  createdAt: Date;
+}
+
+// Mock data for demonstration only
+const MOCK_USERS_DATA: UserData[] = [
   {
     id: "2",
     name: "Técnico Demo",
     email: "tecnico@demo.com",
     role: UserRole.TECHNICIAN,
     active: true,
-    createdAt: new Date("2023-02-10"),
+    createdAt: new Date("2023-04-18"),
   },
   {
     id: "3",
@@ -54,7 +63,7 @@ const MOCK_USERS = [
     email: "admin@demo.com",
     role: UserRole.ADMIN,
     active: true,
-    createdAt: new Date("2023-01-01"),
+    createdAt: new Date("2023-04-15"),
   },
   {
     id: "4",
@@ -86,13 +95,13 @@ const MOCK_USERS = [
     email: "carlos@exemplo.com",
     role: UserRole.TECHNICIAN,
     active: true,
-    createdAt: new Date("2023-02-28"),
+    createdAt: new Date("2023-02-10"),
   },
 ];
 
 const UsersManagement = () => {
   const { user } = useAuth();
-  const [users] = useState(MOCK_USERS);
+  const [users] = useState(MOCK_USERS_DATA);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -161,7 +170,7 @@ const UsersManagement = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Gerenciamento de Usuários</h1>
         <Button onClick={handleAddUser}>
-          <UserPlus size={16} className="mr-2" />
+          <Plus size={16} className="mr-2" />
           Adicionar Usuário
         </Button>
       </div>

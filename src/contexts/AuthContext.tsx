@@ -6,13 +6,6 @@ import { toast } from "sonner";
 // Mock users for demonstration
 const MOCK_USERS = [
   {
-    id: "1",
-    name: "Cliente Demo",
-    email: "cliente@demo.com",
-    password: "cliente123",
-    role: UserRole.CLIENT
-  },
-  {
     id: "2",
     name: "Técnico Demo",
     email: "tecnico@demo.com",
@@ -77,27 +70,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     toast.info("Sessão encerrada");
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string) => {
     setIsLoading(true);
     try {
       // Simulando delay de registro
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (MOCK_USERS.some(u => u.email === email)) {
-        throw new Error("Email já está em uso");
-      }
-      
       // Em um cenário real, isso enviaria dados para uma API
-      const newUser = {
-        id: `${MOCK_USERS.length + 1}`,
-        name,
-        email,
-        role: UserRole.CLIENT
-      };
+      // Note que agora apenas precisamos do nome do cliente
+      const newClientId = `client-${Date.now()}`;
       
-      setUser(newUser);
-      localStorage.setItem("ajudaHubUser", JSON.stringify(newUser));
-      toast.success("Registro realizado com sucesso!");
+      // Não estamos logando o usuário automaticamente após o registro
+      // Apenas notificamos o sucesso
+      toast.success(`Cliente ${name} cadastrado com sucesso!`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro ao registrar";
       toast.error(message);
