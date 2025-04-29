@@ -83,7 +83,7 @@ const TicketsList = () => {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Chamados</h1>
-        {(user?.role === UserRole.CLIENT || user?.role === UserRole.MANAGER) && (
+        {(user?.role === UserRole.CLIENT || user?.role === UserRole.MANAGER || user?.role === UserRole.ADMIN) && (
           <Button onClick={() => navigate("/tickets/new")}>
             <Plus size={16} className="mr-2" />
             Novo Chamado
