@@ -11,20 +11,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
+  ResponsiveContainer,
+  PieChart, 
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  LineChart,
+  Line
 } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -102,6 +103,38 @@ const Dashboard = () => {
     { date: "Sáb", count: 3 },
     { date: "Dom", count: 1 },
   ];
+
+  // Configuração dos gráficos
+  const chartConfig = {
+    open: {
+      label: "Abertos",
+      color: "#ef4444",
+    },
+    inProgress: {
+      label: "Em Andamento",
+      color: "#f59e0b",
+    },
+    resolved: {
+      label: "Resolvidos",
+      color: "#10b981",
+    },
+    high: {
+      label: "Alta",
+      color: "#ef4444",
+    },
+    medium: {
+      label: "Média",
+      color: "#f59e0b",
+    },
+    low: {
+      label: "Baixa",
+      color: "#22c55e",
+    },
+    trend: {
+      label: "Tendência",
+      color: "#3b82f6",
+    },
+  };
 
   return (
     <div className="space-y-6">
@@ -181,7 +214,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={chartConfig} className="h-80">
                 <PieChart>
                   <Pie
                     data={clientTicketsByStatus}
@@ -197,10 +230,12 @@ const Dashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />} 
+                  />
                   <Legend />
                 </PieChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
@@ -214,16 +249,18 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
+              <ChartContainer config={chartConfig} className="h-80">
                 <BarChart data={technicianTicketsByPriority}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
-                  <Tooltip />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />} 
+                  />
                   <Legend />
                   <Bar dataKey="valor" fill="#3b82f6" name="Quantidade" />
                 </BarChart>
-              </ResponsiveContainer>
+              </ChartContainer>
             </div>
           </CardContent>
         </Card>
@@ -239,16 +276,18 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="pl-2">
                 <div className="h-80 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig} className="h-80">
                     <BarChart data={ticketsByStatusAdmin}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />} 
+                      />
                       <Legend />
                       <Bar dataKey="valor" fill="#3b82f6" name="Quantidade" />
                     </BarChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </CardContent>
             </Card>
@@ -260,12 +299,14 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="h-80 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ChartContainer config={chartConfig} className="h-80">
                     <LineChart data={ticketsTrend}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
                       <YAxis />
-                      <Tooltip />
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />} 
+                      />
                       <Legend />
                       <Line
                         type="monotone"
@@ -276,7 +317,7 @@ const Dashboard = () => {
                         dot={{ r: 4 }}
                       />
                     </LineChart>
-                  </ResponsiveContainer>
+                  </ChartContainer>
                 </div>
               </CardContent>
             </Card>
