@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClients } from "@/contexts/ClientContext";
 import { UserRole } from "@/types/user";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
-// Schema de validação - removendo email e senha
+// Schema de validação
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   address: z.string().optional(),
@@ -40,6 +40,7 @@ type ClientFormValues = z.infer<typeof formSchema>;
 const ClientRegistration = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { addClient } = useClients();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ClientFormValues>({
@@ -63,15 +64,19 @@ const ClientRegistration = () => {
   const onSubmit = async (data: ClientFormValues) => {
     setIsSubmitting(true);
     try {
-      // Em um ambiente real, aqui você enviaria os dados para a API
-      // Como não temos mais o processo de autenticação, apenas simulamos o registro
-      toast.success("Cliente cadastrado com sucesso!");
+      // Usar a função addClient do contexto
+      addClient({
+        name: data.name,
+        unit: data.unit || "",
+        address: data.address || "",
+        city: data.city || "",
+        state: data.state || ""
+      });
       
-      // Redireciona para o dashboard
-      navigate("/dashboard");
+      // Redireciona para a lista de clientes
+      navigate("/clients");
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
-      toast.error("Erro ao cadastrar cliente. Por favor, tente novamente.");
     } finally {
       setIsSubmitting(false);
     }

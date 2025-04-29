@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClients } from "@/contexts/ClientContext";
 import { UserRole } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,18 +23,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
 
-// Mock data de clientes para simulação
-const mockClients = [
-  { id: "1", name: "Empresa ABC Ltda.", unit: "Matriz", address: "Av. Paulista, 1000", city: "São Paulo", state: "SP" },
-  { id: "2", name: "Supermercado XYZ", unit: "Filial 1", address: "Rua das Flores, 123", city: "Rio de Janeiro", state: "RJ" },
-  { id: "3", name: "Tech Solutions", unit: "Sede", address: "Av. Tecnologia, 456", city: "Belo Horizonte", state: "MG" },
-  { id: "4", name: "Distribuidora FastDelivery", unit: "Centro", address: "Rua da Entrega, 789", city: "Curitiba", state: "PR" },
-  { id: "5", name: "Consultoria Inovação", unit: "Unidade Principal", address: "Av. Consultores, 321", city: "Brasília", state: "DF" },
-];
-
 const ClientsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { clients } = useClients();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Verificação se o usuário tem permissão para acessar essa página
@@ -44,7 +37,7 @@ const ClientsList = () => {
   }
 
   // Filtrar clientes com base na busca
-  const filteredClients = mockClients.filter((client) => {
+  const filteredClients = clients.filter((client) => {
     // Filtro por busca (nome ou ID)
     if (
       searchQuery &&

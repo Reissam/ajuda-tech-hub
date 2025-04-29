@@ -23,6 +23,7 @@ const MOCK_TICKETS: Ticket[] = [
     priority: TicketPriority.MEDIUM,
     category: TicketCategory.HARDWARE,
     createdBy: "1", // Cliente
+    clientId: "1", // Adicionando clientId
     createdAt: new Date("2023-04-25T10:00:00Z"),
     updatedAt: new Date("2023-04-25T10:00:00Z"),
     comments: []
@@ -36,6 +37,7 @@ const MOCK_TICKETS: Ticket[] = [
     category: TicketCategory.SOFTWARE,
     createdBy: "1", // Cliente
     assignedTo: "2", // Técnico
+    clientId: "2", // Adicionando clientId
     createdAt: new Date("2023-04-24T14:30:00Z"),
     updatedAt: new Date("2023-04-24T15:45:00Z"),
     comments: [
@@ -56,6 +58,7 @@ const MOCK_TICKETS: Ticket[] = [
     category: TicketCategory.NETWORK,
     createdBy: "1", // Cliente
     assignedTo: "2", // Técnico
+    clientId: "3", // Adicionando clientId
     createdAt: new Date("2023-04-20T09:15:00Z"),
     updatedAt: new Date("2023-04-22T11:30:00Z"),
     comments: [
