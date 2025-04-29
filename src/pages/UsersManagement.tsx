@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
@@ -59,6 +58,14 @@ const MOCK_USERS = [
   },
   {
     id: "4",
+    name: "Gestor Demo",
+    email: "gestor@demo.com",
+    role: UserRole.MANAGER,
+    active: true,
+    createdAt: new Date("2023-04-15"),
+  },
+  {
+    id: "5",
     name: "José Silva",
     email: "jose@exemplo.com",
     role: UserRole.CLIENT,
@@ -66,7 +73,7 @@ const MOCK_USERS = [
     createdAt: new Date("2023-03-22"),
   },
   {
-    id: "5",
+    id: "6",
     name: "Maria Oliveira",
     email: "maria@exemplo.com",
     role: UserRole.CLIENT,
@@ -74,7 +81,7 @@ const MOCK_USERS = [
     createdAt: new Date("2023-03-15"),
   },
   {
-    id: "6",
+    id: "7",
     name: "Carlos Técnico",
     email: "carlos@exemplo.com",
     role: UserRole.TECHNICIAN,
@@ -146,7 +153,7 @@ const UsersManagement = () => {
   });
 
   const handleAddUser = () => {
-    toast.info("Funcionalidade de adicionar usuário será implementada em breve.");
+    toast.info("Funcionalidade de adicionar usu��rio será implementada em breve.");
   };
 
   return (
@@ -186,6 +193,7 @@ const UsersManagement = () => {
                 <SelectItem value={UserRole.CLIENT}>Cliente</SelectItem>
                 <SelectItem value={UserRole.TECHNICIAN}>Técnico</SelectItem>
                 <SelectItem value={UserRole.ADMIN}>Administrador</SelectItem>
+                <SelectItem value={UserRole.MANAGER}>Gestor</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -242,6 +250,8 @@ const UsersManagement = () => {
                               ? "bg-primary text-primary-foreground"
                               : user.role === UserRole.TECHNICIAN
                               ? "bg-warning text-primary-foreground"
+                              : user.role === UserRole.MANAGER
+                              ? "bg-info text-primary-foreground"
                               : ""
                           }
                         >
@@ -249,6 +259,8 @@ const UsersManagement = () => {
                             ? "Cliente"
                             : user.role === UserRole.TECHNICIAN
                             ? "Técnico"
+                            : user.role === UserRole.MANAGER
+                            ? "Gestor"
                             : "Admin"}
                         </Badge>
                       </TableCell>

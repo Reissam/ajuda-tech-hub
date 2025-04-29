@@ -82,6 +82,7 @@ const Auth = () => {
               Para demonstração, use:<br />
               <strong>cliente@demo.com / cliente123</strong><br />
               <strong>tecnico@demo.com / tecnico123</strong><br />
+              <strong>gestor@demo.com / gestor123</strong><br />
               <strong>admin@demo.com / admin123</strong>
             </p>
           </CardFooter>

@@ -56,13 +56,13 @@ export const Layout = ({ children }: LayoutProps) => {
       title: "Dashboard",
       icon: <Home size={20} />,
       path: "/dashboard",
-      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN],
+      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN, UserRole.MANAGER],
     },
     {
       title: "Meus Chamados",
       icon: <TicketCheck size={20} />,
       path: "/tickets",
-      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN],
+      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN, UserRole.MANAGER],
     },
     {
       title: "Gerenciar Usuários",
@@ -74,13 +74,13 @@ export const Layout = ({ children }: LayoutProps) => {
       title: "Cadastrar Cliente",
       icon: <UserPlus size={20} />,
       path: "/clients/new",
-      roles: [UserRole.ADMIN],
+      roles: [UserRole.ADMIN, UserRole.MANAGER],
     },
     {
       title: "Configurações",
       icon: <Settings size={20} />,
       path: "/settings",
-      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN],
+      roles: [UserRole.CLIENT, UserRole.TECHNICIAN, UserRole.ADMIN, UserRole.MANAGER],
     },
   ];
 
