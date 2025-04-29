@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -25,15 +27,18 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 
-interface ClientFormValues {
-  name: string;
-  email: string;
-  password: string;
-  address: string;
-  state: string;
-  city: string;
-  unit: string;
-}
+// Schema de validação
+const formSchema = z.object({
+  name: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  address: z.string().optional(),
+  state: z.string().optional(),
+  city: z.string().optional(),
+  unit: z.string().optional(),
+});
+
+type ClientFormValues = z.infer<typeof formSchema>;
 
 const ClientRegistration = () => {
   const { user, register } = useAuth();
@@ -41,6 +46,7 @@ const ClientRegistration = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ClientFormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -52,26 +58,25 @@ const ClientRegistration = () => {
     }
   });
 
-  // Verify if the current user is authorized to access this page
-  if (user?.role !== UserRole.ADMIN && !user) {
-    // If not an admin or not logged in, redirect to login
-    navigate("/auth");
+  // Verificação se o usuário tem permissão para acessar essa página
+  if (user?.role !== UserRole.ADMIN) {
+    // Se não for admin, redireciona para o dashboard
+    navigate("/dashboard");
     return null;
   }
 
   const onSubmit = async (data: ClientFormValues) => {
     setIsSubmitting(true);
     try {
-      // First register the client with basic info
+      // Registra o cliente com informações básicas
       await register(data.name, data.email, data.password);
       
-      // In a real application with a database, we would update the additional fields here
       toast.success("Cliente cadastrado com sucesso!");
       
-      // Redirect to dashboard or clients list
+      // Redireciona para o dashboard
       navigate("/dashboard");
     } catch (error) {
-      console.error("Error registering client:", error);
+      console.error("Erro ao cadastrar cliente:", error);
       toast.error("Erro ao cadastrar cliente. Por favor, tente novamente.");
     } finally {
       setIsSubmitting(false);
@@ -91,103 +96,129 @@ const ClientRegistration = () => {
             Preencha todos os campos para cadastrar um novo cliente no sistema.
           </CardDescription>
         </CardHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome do Cliente</Label>
-                  <Input
-                    id="name"
-                    placeholder="Nome completo"
-                    {...form.register("name", { required: true })}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome do Cliente</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Nome completo" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {form.formState.errors.name && (
-                    <p className="text-sm font-medium text-destructive">Nome é obrigatório</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="email@exemplo.com"
-                    {...form.register("email", { required: true })}
+                  
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="email@exemplo.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {form.formState.errors.email && (
-                    <p className="text-sm font-medium text-destructive">Email é obrigatório</p>
-                  )}
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="********"
-                    {...form.register("password", { required: true })}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Senha</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="********" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  {form.formState.errors.password && (
-                    <p className="text-sm font-medium text-destructive">Senha é obrigatória</p>
-                  )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="unit">Unidade</Label>
-                  <Input
-                    id="unit"
-                    placeholder="Ex: Matriz, Filial 1, etc"
-                    {...form.register("unit")}
+                  
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Unidade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ex: Matriz, Filial 1, etc" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="address">Endereço</Label>
-                <Input
-                  id="address"
-                  placeholder="Rua, número, complemento"
-                  {...form.register("address")}
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Rua, número, complemento" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">Cidade</Label>
-                  <Input
-                    id="city"
-                    placeholder="Cidade"
-                    {...form.register("city")}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Cidade" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="state">Estado</Label>
-                  <Input
-                    id="state"
-                    placeholder="Estado"
-                    {...form.register("state")}
+                  
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Estado" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => navigate(-1)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Cadastrando..." : "Cadastrar Cliente"}
-            </Button>
-          </CardFooter>
-        </form>
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => navigate(-1)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Cadastrando..." : "Cadastrar Cliente"}
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
       </Card>
     </div>
   );

@@ -1,6 +1,6 @@
 
 import { ReactNode, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
 import {
@@ -13,6 +13,7 @@ import {
   Settings,
   TicketCheck,
   Users,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
 
   if (!user) {
@@ -66,6 +68,12 @@ export const Layout = ({ children }: LayoutProps) => {
       title: "Gerenciar Usuários",
       icon: <Users size={20} />,
       path: "/users",
+      roles: [UserRole.ADMIN],
+    },
+    {
+      title: "Cadastrar Cliente",
+      icon: <UserPlus size={20} />,
+      path: "/clients/new",
       roles: [UserRole.ADMIN],
     },
     {
