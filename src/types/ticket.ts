@@ -1,29 +1,22 @@
 
 export enum TicketStatus {
-  OPEN = "open",
-  IN_PROGRESS = "in_progress",
-  RESOLVED = "resolved"
+  OPEN = 'open',
+  IN_PROGRESS = 'in_progress',
+  RESOLVED = 'resolved',
+  CLOSED = 'closed',
 }
 
 export enum TicketPriority {
-  LOW = "low",
-  MEDIUM = "medium",
-  HIGH = "high"
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
 }
 
 export enum TicketCategory {
-  HARDWARE = "hardware",
-  SOFTWARE = "software",
-  NETWORK = "network",
-  OTHER = "other"
-}
-
-export interface TicketComment {
-  id: string;
-  content: string;
-  createdBy: string;
-  createdAt: Date;
-  attachments?: string[];
+  HARDWARE = 'hardware',
+  SOFTWARE = 'software',
+  NETWORK = 'network',
+  OTHER = 'other',
 }
 
 export interface Ticket {
@@ -33,10 +26,18 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   category: TicketCategory;
-  createdBy: string;
-  assignedTo?: string;
   createdAt: Date;
   updatedAt: Date;
-  comments: TicketComment[];
+  createdBy: string;
+  assignedTo?: string;
+  clientId: string; // Added this field
+  comments?: TicketComment[];
+}
+
+export interface TicketComment {
+  id: string;
+  content: string;
+  createdAt: Date;
+  createdBy: string;
   attachments?: string[];
 }

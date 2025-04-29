@@ -15,6 +15,7 @@ import TicketsList from "./pages/TicketsList";
 import NewTicket from "./pages/NewTicket";
 import TicketDetails from "./pages/TicketDetails";
 import UsersManagement from "./pages/UsersManagement";
+import ClientsList from "./pages/ClientsList";
 import ClientRegistration from "./pages/ClientRegistration";
 import NotFound from "./pages/NotFound";
 
@@ -69,6 +70,14 @@ const App = () => {
                   element={
                     <Layout>
                       <UsersManagement />
+                    </Layout>
+                  } 
+                />
+                <Route 
+                  path="/clients" 
+                  element={
+                    <Layout>
+                      <ClientsList />
                     </Layout>
                   } 
                 />

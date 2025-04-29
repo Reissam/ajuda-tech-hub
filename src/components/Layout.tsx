@@ -71,9 +71,9 @@ export const Layout = ({ children }: LayoutProps) => {
       roles: [UserRole.ADMIN],
     },
     {
-      title: "Cadastrar Cliente",
+      title: "Clientes",
       icon: <UserPlus size={20} />,
-      path: "/clients/new",
+      path: "/clients",
       roles: [UserRole.ADMIN, UserRole.MANAGER],
     },
     {
