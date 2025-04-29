@@ -1,160 +1,236 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Ticket, TicketStatus, TicketPriority, TicketCategory } from "@/types/ticket";
+import { Ticket, TicketStatus, TicketPriority, TicketCategory, TicketComment } from "@/types/ticket";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TicketContextType {
   tickets: Ticket[];
-  addTicket: (ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "comments">) => void;
-  updateTicket: (id: string, updates: Partial<Ticket>) => void;
+  addTicket: (ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "comments">) => Promise<void>;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
   getTicketById: (id: string) => Ticket | undefined;
-  assignTicket: (ticketId: string, technicianId: string) => void;
-  addComment: (ticketId: string, content: string, attachments?: string[]) => void;
+  assignTicket: (ticketId: string, technicianId: string) => Promise<void>;
+  addComment: (ticketId: string, content: string, attachments?: string[]) => Promise<void>;
 }
-
-// Mock data
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: "1",
-    title: "Problema com impressora",
-    description: "A impressora não está conectando com a rede",
-    status: TicketStatus.OPEN,
-    priority: TicketPriority.MEDIUM,
-    category: TicketCategory.HARDWARE,
-    createdBy: "1", // Cliente
-    clientId: "1", // Adicionando clientId
-    createdAt: new Date("2023-04-25T10:00:00Z"),
-    updatedAt: new Date("2023-04-25T10:00:00Z"),
-    comments: []
-  },
-  {
-    id: "2",
-    title: "Software travando",
-    description: "O sistema de faturamento trava ao gerar notas",
-    status: TicketStatus.IN_PROGRESS,
-    priority: TicketPriority.HIGH,
-    category: TicketCategory.SOFTWARE,
-    createdBy: "1", // Cliente
-    assignedTo: "2", // Técnico
-    clientId: "2", // Adicionando clientId
-    createdAt: new Date("2023-04-24T14:30:00Z"),
-    updatedAt: new Date("2023-04-24T15:45:00Z"),
-    comments: [
-      {
-        id: "c1",
-        content: "Iniciando análise do problema",
-        createdBy: "2", // Técnico
-        createdAt: new Date("2023-04-24T15:45:00Z")
-      }
-    ]
-  },
-  {
-    id: "3",
-    title: "Internet instável",
-    description: "Conexão caindo frequentemente no setor de vendas",
-    status: TicketStatus.RESOLVED,
-    priority: TicketPriority.HIGH,
-    category: TicketCategory.NETWORK,
-    createdBy: "1", // Cliente
-    assignedTo: "2", // Técnico
-    clientId: "3", // Adicionando clientId
-    createdAt: new Date("2023-04-20T09:15:00Z"),
-    updatedAt: new Date("2023-04-22T11:30:00Z"),
-    comments: [
-      {
-        id: "c2",
-        content: "Identificado problema no roteador",
-        createdBy: "2", // Técnico
-        createdAt: new Date("2023-04-21T10:30:00Z")
-      },
-      {
-        id: "c3",
-        content: "Roteador substituído e problema resolvido",
-        createdBy: "2", // Técnico
-        createdAt: new Date("2023-04-22T11:30:00Z")
-      }
-    ]
-  }
-];
 
 const TicketContext = createContext<TicketContextType | undefined>(undefined);
 
 export const TicketProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchTickets = async () => {
+    if (!user) return;
+
+    try {
+      setIsLoading(true);
+      
+      // Buscar tickets
+      const { data: ticketsData, error: ticketsError } = await supabase
+        .from('tickets')
+        .select('*, ticket_comments(*)');
+      
+      if (ticketsError) {
+        throw ticketsError;
+      }
+
+      if (!ticketsData) {
+        setTickets([]);
+        return;
+      }
+
+      // Transformar os dados para o formato esperado pela aplicação
+      const formattedTickets: Ticket[] = ticketsData.map(ticket => ({
+        id: ticket.id,
+        title: ticket.title,
+        description: ticket.description,
+        status: ticket.status as TicketStatus,
+        priority: ticket.priority as TicketPriority,
+        category: ticket.category as TicketCategory,
+        createdAt: new Date(ticket.created_at),
+        updatedAt: new Date(ticket.updated_at),
+        createdBy: ticket.created_by || '',
+        assignedTo: ticket.assigned_to,
+        clientId: ticket.client_id,
+        comments: ticket.ticket_comments ? ticket.ticket_comments.map((comment: any) => ({
+          id: comment.id,
+          content: comment.content,
+          createdAt: new Date(comment.created_at),
+          createdBy: comment.created_by,
+          attachments: comment.attachments
+        })) : []
+      }));
+
+      setTickets(formattedTickets);
+    } catch (error) {
+      console.error("Erro ao carregar tickets:", error);
+      toast.error("Erro ao carregar tickets");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulando carregamento de tickets de uma API
-    const loadTickets = async () => {
-      // Em um cenário real, isso seria uma chamada à API
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setTickets(MOCK_TICKETS);
-    };
-
     if (user) {
-      loadTickets();
+      fetchTickets();
     }
   }, [user]);
 
-  const addTicket = (
+  const addTicket = async (
     ticketData: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "comments">
   ) => {
-    const newTicket: Ticket = {
-      ...ticketData,
-      id: `${tickets.length + 1}`,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      comments: []
-    };
+    try {
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
 
-    setTickets(prev => [...prev, newTicket]);
-    toast.success("Chamado aberto com sucesso!");
+      // Inserir novo ticket no Supabase
+      const { data, error } = await supabase
+        .from('tickets')
+        .insert([{
+          title: ticketData.title,
+          description: ticketData.description,
+          status: ticketData.status,
+          priority: ticketData.priority,
+          category: ticketData.category,
+          created_by: user.id,
+          client_id: ticketData.clientId
+        }])
+        .select('*')
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+
+      // Adicionar o novo ticket ao estado local
+      const newTicket: Ticket = {
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        status: data.status as TicketStatus,
+        priority: data.priority as TicketPriority,
+        category: data.category as TicketCategory,
+        createdAt: new Date(data.created_at),
+        updatedAt: new Date(data.updated_at),
+        createdBy: data.created_by || user.id,
+        assignedTo: data.assigned_to,
+        clientId: data.client_id,
+        comments: []
+      };
+
+      setTickets(prev => [...prev, newTicket]);
+      toast.success("Chamado aberto com sucesso!");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Erro ao abrir chamado:", error);
+      toast.error("Erro ao abrir chamado");
+      throw error;
+    }
   };
 
-  const updateTicket = (id: string, updates: Partial<Ticket>) => {
-    setTickets(prev =>
-      prev.map(ticket =>
-        ticket.id === id
-          ? { ...ticket, ...updates, updatedAt: new Date() }
-          : ticket
-      )
-    );
-    toast.success("Chamado atualizado com sucesso!");
+  const updateTicket = async (id: string, updates: Partial<Ticket>) => {
+    try {
+      // Preparar dados para atualização
+      const updateData: any = {};
+      if (updates.title) updateData.title = updates.title;
+      if (updates.description) updateData.description = updates.description;
+      if (updates.status) updateData.status = updates.status;
+      if (updates.priority) updateData.priority = updates.priority;
+      if (updates.category) updateData.category = updates.category;
+      if (updates.assignedTo) updateData.assigned_to = updates.assignedTo;
+      
+      // Atualizar no Supabase
+      const { error } = await supabase
+        .from('tickets')
+        .update(updateData)
+        .eq('id', id);
+      
+      if (error) {
+        throw error;
+      }
+
+      // Atualizar estado local
+      setTickets(prev =>
+        prev.map(ticket =>
+          ticket.id === id
+            ? { ...ticket, ...updates, updatedAt: new Date() }
+            : ticket
+        )
+      );
+      toast.success("Chamado atualizado com sucesso!");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Erro ao atualizar chamado:", error);
+      toast.error("Erro ao atualizar chamado");
+      throw error;
+    }
   };
 
   const getTicketById = (id: string) => {
     return tickets.find(ticket => ticket.id === id);
   };
 
-  const assignTicket = (ticketId: string, technicianId: string) => {
-    updateTicket(ticketId, { assignedTo: technicianId });
-    toast.success("Chamado atribuído com sucesso!");
+  const assignTicket = async (ticketId: string, technicianId: string) => {
+    try {
+      await updateTicket(ticketId, { assignedTo: technicianId });
+      toast.success("Chamado atribuído com sucesso!");
+      return Promise.resolve();
+    } catch (error) {
+      throw error;
+    }
   };
 
-  const addComment = (ticketId: string, content: string, attachments?: string[]) => {
-    if (!user) return;
+  const addComment = async (ticketId: string, content: string, attachments?: string[]) => {
+    if (!user) return Promise.reject("Usuário não autenticado");
 
-    const newComment = {
-      id: `c${Date.now()}`,
-      content,
-      createdBy: user.id,
-      createdAt: new Date(),
-      attachments
-    };
+    try {
+      // Inserir comentário no Supabase
+      const { data, error } = await supabase
+        .from('ticket_comments')
+        .insert([{
+          ticket_id: ticketId,
+          content,
+          created_by: user.id,
+          attachments: attachments || null
+        }])
+        .select('*')
+        .single();
+      
+      if (error) {
+        throw error;
+      }
 
-    setTickets(prev =>
-      prev.map(ticket =>
-        ticket.id === ticketId
-          ? {
-              ...ticket,
-              comments: [...ticket.comments, newComment],
-              updatedAt: new Date()
-            }
-          : ticket
-      )
-    );
-    toast.success("Comentário adicionado!");
+      // Criar novo comentário para o estado local
+      const newComment: TicketComment = {
+        id: data.id,
+        content: data.content,
+        createdAt: new Date(data.created_at),
+        createdBy: data.created_by,
+        attachments: data.attachments
+      };
+
+      // Atualizar estado local
+      setTickets(prev =>
+        prev.map(ticket =>
+          ticket.id === ticketId
+            ? {
+                ...ticket,
+                comments: [...(ticket.comments || []), newComment],
+                updatedAt: new Date()
+              }
+            : ticket
+        )
+      );
+      toast.success("Comentário adicionado!");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Erro ao adicionar comentário:", error);
+      toast.error("Erro ao adicionar comentário");
+      throw error;
+    }
   };
 
   return (

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "@/contexts/TicketContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClients } from "@/contexts/ClientContext";
 import { TicketPriority, TicketStatus, TicketCategory } from "@/types/ticket";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,19 +41,11 @@ import { toast } from "sonner";
 import { Search, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Mock data de clientes para simulação
-const mockClients = [
-  { id: "1", name: "Empresa ABC Ltda.", unit: "Matriz" },
-  { id: "2", name: "Supermercado XYZ", unit: "Filial 1" },
-  { id: "3", name: "Tech Solutions", unit: "Sede" },
-  { id: "4", name: "Distribuidora FastDelivery", unit: "Centro" },
-  { id: "5", name: "Consultoria Inovação", unit: "Unidade Principal" },
-];
-
 const NewTicket = () => {
   const navigate = useNavigate();
   const { addTicket } = useTickets();
   const { user } = useAuth();
+  const { clients } = useClients(); // Usando os clientes do context
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
@@ -64,7 +57,7 @@ const NewTicket = () => {
   const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description || !selectedClient) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
@@ -77,20 +70,19 @@ const NewTicket = () => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Pass clientId in the addTicket function
-      addTicket({
+      await addTicket({
         title,
         description,
         status: TicketStatus.OPEN,
         priority,
         category,
         createdBy: user.id,
-        clientId: selectedClient, // This is correctly passed now
+        clientId: selectedClient,
       });
 
-      toast.success("Chamado aberto com sucesso!");
       navigate("/tickets");
     } catch (error) {
+      console.error("Erro ao abrir chamado:", error);
       toast.error("Erro ao abrir chamado");
     } finally {
       setIsSubmitting(false);
@@ -111,7 +103,7 @@ const NewTicket = () => {
                 className="justify-between min-w-[240px]"
               >
                 {selectedClient
-                  ? mockClients.find((client) => client.id === selectedClient)?.name
+                  ? clients.find((client) => client.id === selectedClient)?.name
                   : "Buscar cliente..."}
                 <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -135,7 +127,7 @@ const NewTicket = () => {
                     </div>
                   </CommandEmpty>
                   <CommandGroup>
-                    {mockClients.map((client) => (
+                    {clients.map((client) => (
                       <CommandItem
                         key={client.id}
                         value={client.name}

@@ -2,47 +2,109 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Client } from "@/types/client";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientContextType {
   clients: Client[];
-  addClient: (client: Omit<Client, "id">) => void;
-  updateClient: (id: string, updates: Partial<Client>) => void;
+  addClient: (client: Omit<Client, "id">) => Promise<void>;
+  updateClient: (id: string, updates: Partial<Client>) => Promise<void>;
   getClientById: (id: string) => Client | undefined;
 }
-
-// Mock data para clientes
-const MOCK_CLIENTS: Client[] = [
-  { id: "1", name: "Empresa ABC Ltda.", unit: "Matriz", address: "Av. Paulista, 1000", city: "São Paulo", state: "SP" },
-  { id: "2", name: "Supermercado XYZ", unit: "Filial 1", address: "Rua das Flores, 123", city: "Rio de Janeiro", state: "RJ" },
-  { id: "3", name: "Tech Solutions", unit: "Sede", address: "Av. Tecnologia, 456", city: "Belo Horizonte", state: "MG" },
-  { id: "4", name: "Distribuidora FastDelivery", unit: "Centro", address: "Rua da Entrega, 789", city: "Curitiba", state: "PR" },
-  { id: "5", name: "Consultoria Inovação", unit: "Unidade Principal", address: "Av. Consultores, 321", city: "Brasília", state: "DF" },
-];
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export const ClientProvider = ({ children }: { children: ReactNode }) => {
-  const [clients, setClients] = useState<Client[]>(MOCK_CLIENTS);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addClient = (clientData: Omit<Client, "id">) => {
-    const newClient: Client = {
-      ...clientData,
-      id: `${clients.length + 1}`
+  // Carregar clientes do Supabase quando o componente for montado
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('clients')
+          .select('*');
+        
+        if (error) {
+          throw error;
+        }
+
+        // Transformar os dados para o formato esperado pela aplicação
+        const clientsData: Client[] = data.map(client => ({
+          id: client.id,
+          name: client.name,
+          unit: client.unit,
+          address: client.address,
+          city: client.city,
+          state: client.state
+        }));
+
+        setClients(clientsData);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        toast.error('Erro ao carregar clientes');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setClients(prev => [...prev, newClient]);
-    toast.success("Cliente cadastrado com sucesso!");
+    fetchClients();
+  }, []);
+
+  const addClient = async (clientData: Omit<Client, "id">) => {
+    try {
+      const { data, error } = await supabase
+        .from('clients')
+        .insert([clientData])
+        .select('*')
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+
+      const newClient: Client = {
+        id: data.id,
+        name: data.name,
+        unit: data.unit,
+        address: data.address,
+        city: data.city,
+        state: data.state
+      };
+
+      setClients(prev => [...prev, newClient]);
+      toast.success("Cliente cadastrado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao cadastrar cliente:', error);
+      toast.error('Erro ao cadastrar cliente');
+      throw error;
+    }
   };
 
-  const updateClient = (id: string, updates: Partial<Client>) => {
-    setClients(prev =>
-      prev.map(client =>
-        client.id === id
-          ? { ...client, ...updates }
-          : client
-      )
-    );
-    toast.success("Cliente atualizado com sucesso!");
+  const updateClient = async (id: string, updates: Partial<Client>) => {
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .update(updates)
+        .eq('id', id);
+      
+      if (error) {
+        throw error;
+      }
+
+      setClients(prev =>
+        prev.map(client =>
+          client.id === id
+            ? { ...client, ...updates }
+            : client
+        )
+      );
+      toast.success("Cliente atualizado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao atualizar cliente:', error);
+      toast.error('Erro ao atualizar cliente');
+      throw error;
+    }
   };
 
   const getClientById = (id: string) => {
