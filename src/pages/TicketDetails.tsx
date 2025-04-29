@@ -1,13 +1,7 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTickets } from "@/contexts/TicketContext";
 import { UserRole } from "@/types/user";
-import { TicketStatus } from "@/types/ticket";
-import { StatusBadge } from "@/components/StatusBadge";
-import { PriorityBadge } from "@/components/PriorityBadge";
-import { CategoryBadge } from "@/components/CategoryBadge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -25,35 +18,155 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { ArrowLeft, Clock, MessageSquare, Send } from "lucide-react";
+
+// Enums para status e prioridade
+enum TicketStatus {
+  OPEN = "open",
+  IN_PROGRESS = "in_progress",
+  WAITING = "waiting",
+  RESOLVED = "resolved",
+  CLOSED = "closed",
+}
+
+enum TicketPriority {
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  CRITICAL = "critical",
+}
+
+// Interface para o tipo de chamado
+interface Ticket {
+  id: string;
+  title: string;
+  description: string;
+  status: TicketStatus;
+  priority: TicketPriority;
+  createdAt: Date;
+  updatedAt: Date;
+  clientId: string;
+  clientName: string;
+  technicianId?: string;
+  technicianName?: string;
+  comments: Comment[];
+}
+
+// Interface para comentários
+interface Comment {
+  id: string;
+  text: string;
+  createdAt: Date;
+  userId: string;
+  userName: string;
+  userRole: UserRole;
+}
+
+// Mock de um chamado para demonstração
+const MOCK_TICKET: Ticket = {
+  id: "123",
+  title: "Problema com impressora",
+  description: "A impressora não está conectando na rede. Já tentei reiniciar e verificar os cabos, mas continua sem funcionar.",
+  status: TicketStatus.OPEN,
+  priority: TicketPriority.MEDIUM,
+  createdAt: new Date("2023-05-10T14:30:00"),
+  updatedAt: new Date("2023-05-10T14:30:00"),
+  clientId: "1",
+  clientName: "Cliente Demo",
+  comments: [
+    {
+      id: "c1",
+      text: "Já verificou se o endereço IP está configurado corretamente?",
+      createdAt: new Date("2023-05-10T15:45:00"),
+      userId: "2",
+      userName: "Técnico Demo",
+      userRole: UserRole.TECHNICIAN,
+    },
+    {
+      id: "c2",
+      text: "Sim, o IP está correto. Também já tentei usar outro cabo de rede.",
+      createdAt: new Date("2023-05-10T16:20:00"),
+      userId: "1",
+      userName: "Cliente Demo",
+      userRole: UserRole.CLIENT,
+    },
+  ],
+};
 
 const TicketDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const { getTicketById, updateTicket, addComment } = useTickets();
-  const [newComment, setNewComment] = useState("");
-  const [newStatus, setNewStatus] = useState<TicketStatus | "">("");
+  const navigate = useNavigate();
+  const [ticket, setTicket] = useState<Ticket | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [comment, setComment] = useState("");
+  const [status, setStatus] = useState<"" | TicketStatus>("");
+  const [isInternal, setIsInternal] = useState(false);
 
-  if (!id) {
-    navigate("/tickets");
-    return null;
-  }
+  useEffect(() => {
+    // Simulando carregamento de dados
+    const loadTicket = async () => {
+      try {
+        // Em um cenário real, aqui faria uma chamada à API
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setTicket(MOCK_TICKET);
+        setStatus(MOCK_TICKET.status);
+      } catch (error) {
+        toast.error("Erro ao carregar detalhes do chamado");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const ticket = getTicketById(id);
+    loadTicket();
+  }, [id]);
 
-  if (!ticket) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <h1 className="text-2xl font-bold mb-4">Chamado não encontrado</h1>
-        <Button onClick={() => navigate("/tickets")}>Voltar para Chamados</Button>
-      </div>
-    );
-  }
+  const handleStatusChange = async () => {
+    if (!status) return;
+
+    try {
+      // Simulando atualização de status
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setTicket((prev) => (prev ? { ...prev, status } : null));
+      toast.success("Status atualizado com sucesso");
+    } catch (error) {
+      toast.error("Erro ao atualizar status");
+    }
+  };
+
+  const handleCommentSubmit = async () => {
+    if (!comment.trim() || !user) return;
+
+    try {
+      // Simulando envio de comentário
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const newComment: Comment = {
+        id: `c${Date.now()}`,
+        text: comment,
+        createdAt: new Date(),
+        userId: user.id,
+        userName: user.name,
+        userRole: user.role,
+      };
+
+      setTicket((prev) =>
+        prev ? { ...prev, comments: [...prev.comments, newComment] } : null
+      );
+      setComment("");
+      toast.success("Comentário adicionado com sucesso");
+    } catch (error) {
+      toast.error("Erro ao adicionar comentário");
+    }
+  };
 
   const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("pt-BR", {
+    return new Date(date).toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -62,185 +175,269 @@ const TicketDetails = () => {
     });
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+  const getStatusColor = (status: TicketStatus) => {
+    switch (status) {
+      case TicketStatus.OPEN:
+        return "bg-blue-500";
+      case TicketStatus.IN_PROGRESS:
+        return "bg-yellow-500";
+      case TicketStatus.WAITING:
+        return "bg-purple-500";
+      case TicketStatus.RESOLVED:
+        return "bg-green-500";
+      case TicketStatus.CLOSED:
+        return "bg-gray-500";
+      default:
+        return "bg-gray-500";
+    }
   };
 
-  const handleStatusChange = () => {
-    if (!newStatus) return;
-    updateTicket(ticket.id, { status: newStatus as TicketStatus });
-    setNewStatus("");
+  const getPriorityColor = (priority: TicketPriority) => {
+    switch (priority) {
+      case TicketPriority.LOW:
+        return "bg-green-500";
+      case TicketPriority.MEDIUM:
+        return "bg-yellow-500";
+      case TicketPriority.HIGH:
+        return "bg-orange-500";
+      case TicketPriority.CRITICAL:
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
-    addComment(ticket.id, newComment);
-    setNewComment("");
+  const getStatusLabel = (status: TicketStatus) => {
+    switch (status) {
+      case TicketStatus.OPEN:
+        return "Aberto";
+      case TicketStatus.IN_PROGRESS:
+        return "Em Andamento";
+      case TicketStatus.WAITING:
+        return "Aguardando";
+      case TicketStatus.RESOLVED:
+        return "Resolvido";
+      case TicketStatus.CLOSED:
+        return "Fechado";
+      default:
+        return "Desconhecido";
+    }
   };
 
-  const canUpdateStatus =
-    user?.role === UserRole.ADMIN || (user?.role === UserRole.TECHNICIAN && ticket.assignedTo === user.id);
+  const getPriorityLabel = (priority: TicketPriority) => {
+    switch (priority) {
+      case TicketPriority.LOW:
+        return "Baixa";
+      case TicketPriority.MEDIUM:
+        return "Média";
+      case TicketPriority.HIGH:
+        return "Alta";
+      case TicketPriority.CRITICAL:
+        return "Crítica";
+      default:
+        return "Desconhecida";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <p>Carregando detalhes do chamado...</p>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <h1 className="text-2xl font-bold mb-4">Chamado não encontrado</h1>
+        <p className="text-muted-foreground mb-4">
+          O chamado que você está procurando não existe ou foi removido.
+        </p>
+        <Button onClick={() => navigate("/tickets")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para lista de chamados
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/tickets")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <h1 className="text-2xl font-bold tracking-tight">
             Chamado #{ticket.id}
           </h1>
-          <p className="text-muted-foreground">
-            Aberto em {formatDate(ticket.createdAt)}
-          </p>
         </div>
-        <Button variant="outline" onClick={() => navigate("/tickets")}>
-          Voltar para Chamados
-        </Button>
+        <div className="flex gap-2">
+          <Badge className={getPriorityColor(ticket.priority)}>
+            {getPriorityLabel(ticket.priority)}
+          </Badge>
+          <Badge className={getStatusColor(ticket.status)}>
+            {getStatusLabel(ticket.status)}
+          </Badge>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex justify-between items-start">
-              <div>{ticket.title}</div>
-              <StatusBadge status={ticket.status} />
-            </CardTitle>
-            <CardDescription className="flex flex-wrap gap-2 mt-1">
-              <CategoryBadge category={ticket.category} />
-              <PriorityBadge priority={ticket.priority} />
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{ticket.title}</CardTitle>
+          <CardDescription className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Aberto em {formatDate(ticket.createdAt)} por {ticket.clientName}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Descrição</h3>
-              <p className="whitespace-pre-wrap">{ticket.description}</p>
+              <h3 className="text-lg font-medium">Descrição</h3>
+              <p className="mt-2 whitespace-pre-wrap">{ticket.description}</p>
             </div>
 
-            <Separator className="my-4" />
-
-            <div>
-              <h3 className="font-medium mb-4">Histórico de Atualizações</h3>
-
-              {ticket.comments && ticket.comments.length > 0 ? (
-                <div className="space-y-4">
-                  {ticket.comments.map((comment) => (
-                    <div key={comment.id} className="bg-muted p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {getInitials("User")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">
-                            {comment.createdBy === user?.id ? "Você" : "Técnico"}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(comment.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-sm">{comment.content}</p>
-                    </div>
-                  ))}
+            {(user?.role === UserRole.TECHNICIAN ||
+              user?.role === UserRole.ADMIN) && (
+              <div className="border rounded-md p-4 bg-muted/50">
+                <h3 className="text-lg font-medium mb-2">Atualizar Status</h3>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setStatus(value as "" | TicketStatus)}
+                  >
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                      <SelectValue placeholder="Selecione o status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TicketStatus.OPEN}>Aberto</SelectItem>
+                      <SelectItem value={TicketStatus.IN_PROGRESS}>
+                        Em Andamento
+                      </SelectItem>
+                      <SelectItem value={TicketStatus.WAITING}>
+                        Aguardando
+                      </SelectItem>
+                      <SelectItem value={TicketStatus.RESOLVED}>
+                        Resolvido
+                      </SelectItem>
+                      <SelectItem value={TicketStatus.CLOSED}>
+                        Fechado
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleStatusChange}>Atualizar Status</Button>
                 </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">Nenhuma atualização disponível</p>
-              )}
-            </div>
-
-            {(user?.role === UserRole.TECHNICIAN || user?.role === UserRole.ADMIN) && (
-              <form onSubmit={handleAddComment} className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Adicionar nova observação..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={!newComment.trim()}>
-                    Adicionar Comentário
-                  </Button>
-                </div>
-              </form>
-            )}
-          </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="text-sm text-muted-foreground">Status</div>
-                <div className="text-sm font-medium">
-                  <StatusBadge status={ticket.status} />
-                </div>
-
-                <div className="text-sm text-muted-foreground">Prioridade</div>
-                <div className="text-sm font-medium">
-                  <PriorityBadge priority={ticket.priority} />
-                </div>
-
-                <div className="text-sm text-muted-foreground">Categoria</div>
-                <div className="text-sm font-medium">
-                  <CategoryBadge category={ticket.category} />
-                </div>
-
-                <div className="text-sm text-muted-foreground">Data de abertura</div>
-                <div className="text-sm font-medium">{formatDate(ticket.createdAt)}</div>
-
-                <div className="text-sm text-muted-foreground">
-                  Última atualização
-                </div>
-                <div className="text-sm font-medium">{formatDate(ticket.updatedAt)}</div>
               </div>
-            </CardContent>
-          </Card>
+            )}
 
-          {canUpdateStatus && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Atualizar Status</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Select value={newStatus} onValueChange={setNewStatus}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o novo status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={TicketStatus.OPEN}>Aberto</SelectItem>
-                    <SelectItem value={TicketStatus.IN_PROGRESS}>
-                      Em Andamento
-                    </SelectItem>
-                    <SelectItem value={TicketStatus.RESOLVED}>
-                      Resolvido
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardContent>
-              <CardFooter>
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium">Comentários</h3>
+                <Badge variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  {ticket.comments.length}
+                </Badge>
+              </div>
+
+              <div className="space-y-4">
+                {ticket.comments.map((comment) => (
+                  <div
+                    key={comment.id}
+                    className={`flex gap-3 ${
+                      comment.userId === user?.id
+                        ? "flex-row-reverse"
+                        : "flex-row"
+                    }`}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {comment.userName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div
+                      className={`rounded-lg p-3 max-w-[80%] ${
+                        comment.userId === user?.id
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center gap-4 mb-1">
+                        <span className="font-medium text-sm">
+                          {comment.userName}
+                        </span>
+                        <span className="text-xs opacity-70">
+                          {formatDate(comment.createdAt)}
+                        </span>
+                      </div>
+                      <p className="whitespace-pre-wrap">{comment.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Adicionar Comentário</h3>
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="Digite seu comentário aqui..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="min-h-[100px]"
+                />
+                {(user?.role === UserRole.TECHNICIAN ||
+                  user?.role === UserRole.ADMIN) && (
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="internal"
+                      checked={isInternal}
+                      onCheckedChange={() => setIsInternal(!isInternal)}
+                    />
+                    <label
+                      htmlFor="internal"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Comentário interno (visível apenas para técnicos e
+                      administradores)
+                    </label>
+                  </div>
+                )}
                 <Button
-                  onClick={handleStatusChange}
-                  className="w-full"
-                  disabled={!newStatus}
+                  onClick={handleCommentSubmit}
+                  disabled={!comment.trim()}
+                  className="w-full sm:w-auto"
                 >
-                  Atualizar Status
+                  <Send className="mr-2 h-4 w-4" />
+                  Enviar Comentário
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between border-t pt-6">
+          <div className="text-sm text-muted-foreground">
+            Última atualização: {formatDate(ticket.updatedAt)}
+          </div>
+          {(user?.role === UserRole.ADMIN ||
+            (user?.role === UserRole.TECHNICIAN &&
+              ticket.status !== TicketStatus.CLOSED)) && (
+            <Button variant="outline" color="red">
+              {ticket.status === TicketStatus.CLOSED
+                ? "Reabrir Chamado"
+                : "Fechar Chamado"}
+            </Button>
           )}
-        </div>
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

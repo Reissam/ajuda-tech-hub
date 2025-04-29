@@ -10,6 +10,10 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  address?: string;
+  state?: string;
+  city?: string;
+  unit?: string;
 }
 
 export interface AuthContextType {
