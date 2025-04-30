@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 // Schema de validação
 const formSchema = z.object({
@@ -62,8 +63,8 @@ const ClientRegistration = () => {
   }
 
   const onSubmit = async (data: ClientFormValues) => {
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
       console.log("Dados do formulário:", data);
       
       // Usar a função addClient do contexto
@@ -75,10 +76,13 @@ const ClientRegistration = () => {
         state: data.state
       });
       
+      toast.success("Cliente cadastrado com sucesso!");
+      
       // Redireciona para a lista de clientes
       navigate("/clients");
     } catch (error) {
       console.error("Erro ao cadastrar cliente:", error);
+      toast.error("Erro ao cadastrar cliente");
     } finally {
       setIsSubmitting(false);
     }

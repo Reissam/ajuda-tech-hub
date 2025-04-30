@@ -59,7 +59,11 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
           content: comment.content,
           createdAt: new Date(comment.created_at),
           createdBy: comment.created_by,
-          attachments: comment.attachments ? (Array.isArray(comment.attachments) ? comment.attachments : [comment.attachments.toString()]) : []
+          attachments: comment.attachments ? 
+            (Array.isArray(comment.attachments) ? 
+              comment.attachments.map(a => String(a)) : 
+              [String(comment.attachments)]
+            ) : []
         })) : []
       }));
 
@@ -214,7 +218,11 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         content: data.content,
         createdAt: new Date(data.created_at),
         createdBy: data.created_by,
-        attachments: data.attachments ? (Array.isArray(data.attachments) ? data.attachments : [data.attachments.toString()]) : []
+        attachments: data.attachments ? 
+          (Array.isArray(data.attachments) ? 
+            data.attachments.map(a => String(a)) : 
+            [String(data.attachments)]
+          ) : []
       };
 
       // Atualizar estado local

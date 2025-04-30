@@ -63,9 +63,18 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Todos os campos são obrigatórios");
       }
 
+      // Criar objeto para inserção
+      const insertData = {
+        name: clientData.name,
+        unit: clientData.unit,
+        address: clientData.address,
+        city: clientData.city,
+        state: clientData.state
+      };
+
       const { data, error } = await supabase
         .from('clients')
-        .insert([clientData])
+        .insert([insertData])
         .select('*')
         .single();
       
@@ -87,9 +96,10 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
 
       setClients(prev => [...prev, newClient]);
       toast.success("Cliente cadastrado com sucesso!");
-    } catch (error) {
+      return Promise.resolve();
+    } catch (error: any) {
       console.error('Erro ao cadastrar cliente:', error);
-      toast.error('Erro ao cadastrar cliente');
+      toast.error(`Erro ao cadastrar cliente: ${error.message || error}`);
       throw error;
     }
   };
@@ -113,6 +123,7 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         )
       );
       toast.success("Cliente atualizado com sucesso!");
+      return Promise.resolve();
     } catch (error) {
       console.error('Erro ao atualizar cliente:', error);
       toast.error('Erro ao atualizar cliente');
