@@ -24,8 +24,9 @@ const Auth = () => {
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [registerName, setRegisterName] = useState("");
   
-  const { login, isLoading } = useAuth();
+  const { login, register, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -45,10 +46,8 @@ const Auth = () => {
       return;
     }
     
-    // Por enquanto, vamos usar o login normal já que a função de registro
-    // será configurada posteriormente
     try {
-      await login(registerEmail, registerPassword);
+      await register(registerEmail, registerPassword, registerName);
       navigate("/dashboard");
     } catch (error) {
       // Erro já tratado no contexto de autenticação
@@ -124,6 +123,17 @@ const Auth = () => {
           <TabsContent value="register">
             <form onSubmit={handleRegister}>
               <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="register-name">Nome</Label>
+                  <Input
+                    id="register-name"
+                    type="text"
+                    placeholder="Seu nome"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="register-email">Email</Label>
                   <Input

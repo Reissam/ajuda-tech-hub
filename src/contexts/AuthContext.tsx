@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
       
       toast.success("Login realizado com sucesso!");
-      return data;
+      return;
     } catch (error: any) {
       const message = error.message || "Erro ao fazer login";
       toast.error(message);
@@ -116,13 +116,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (name: string) => {
-    // Esta função é usada apenas para registro de clientes
-    // e não afeta a autenticação, então a mantemos sem alterações
+  const register = async (email: string, password: string, name: string) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success(`Cliente ${name} cadastrado com sucesso!`);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(`Cadastro realizado com sucesso! Verifique seu email.`);
+      return;
     } catch (error: any) {
       const message = error.message || "Erro ao registrar";
       toast.error(message);
