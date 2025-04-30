@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "@/contexts/TicketContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { TicketPriority, TicketStatus, TicketCategory } from "@/types/ticket";
+import { TicketPriority, TicketStatus, TicketCategory, TicketType } from "@/types/ticket";
 import { toast } from "sonner";
 import { ClientSearchComponent } from "@/components/tickets/ClientSearchComponent";
 import { ClientInfoCard } from "@/components/tickets/ClientInfoCard";
@@ -17,7 +17,7 @@ const NewTicket = () => {
   const { clients } = useClients();
   
   // Form state
-  const [title, setTitle] = useState("");
+  const [ticketType, setTicketType] = useState<TicketType>(TicketType.PREVENTIVE_MAINTENANCE);
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [category, setCategory] = useState<TicketCategory>(TicketCategory.SOFTWARE);
@@ -29,7 +29,7 @@ const NewTicket = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !description || !selectedClient) {
+    if (!description || !selectedClient) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -41,7 +41,7 @@ const NewTicket = () => {
       }
 
       await addTicket({
-        title,
+        ticketType,
         description,
         status: TicketStatus.OPEN,
         priority,
@@ -75,8 +75,8 @@ const NewTicket = () => {
       )}
 
       <TicketDetailsForm
-        title={title}
-        setTitle={setTitle}
+        ticketType={ticketType}
+        setTicketType={setTicketType}
         description={description}
         setDescription={setDescription}
         priority={priority}

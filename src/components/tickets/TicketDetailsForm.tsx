@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { TicketPriority, TicketStatus, TicketCategory } from "@/types/ticket";
+import { TicketPriority, TicketStatus, TicketCategory, TicketType } from "@/types/ticket";
 import {
   Card,
   CardContent,
@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/select";
 
 interface TicketFormProps {
-  title: string;
-  setTitle: (title: string) => void;
+  ticketType: TicketType;
+  setTicketType: (ticketType: TicketType) => void;
   description: string;
   setDescription: (description: string) => void;
   priority: TicketPriority;
@@ -37,8 +37,8 @@ interface TicketFormProps {
 }
 
 export const TicketDetailsForm = ({
-  title,
-  setTitle,
+  ticketType,
+  setTicketType,
   description,
   setDescription,
   priority,
@@ -61,14 +61,21 @@ export const TicketDetailsForm = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Título</Label>
-            <Input
-              id="title"
-              placeholder="Descreva brevemente o problema"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+            <Label htmlFor="ticketType">Tipo de Chamado</Label>
+            <Select
+              value={ticketType}
+              onValueChange={(value) => setTicketType(value as TicketType)}
+            >
+              <SelectTrigger id="ticketType">
+                <SelectValue placeholder="Selecione o tipo de chamado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TicketType.PREVENTIVE_MAINTENANCE}>Manutenção preventiva</SelectItem>
+                <SelectItem value={TicketType.CORRECTIVE_MAINTENANCE}>Manutenção corretiva</SelectItem>
+                <SelectItem value={TicketType.INSTALLATION}>Instalação</SelectItem>
+                <SelectItem value={TicketType.CORRECTIVE_AND_PREVENTIVE}>Manutenção Corretiva e preventiva</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

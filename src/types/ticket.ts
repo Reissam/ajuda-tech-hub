@@ -19,9 +19,17 @@ export enum TicketCategory {
   OTHER = 'other',
 }
 
+export enum TicketType {
+  PREVENTIVE_MAINTENANCE = 'preventive_maintenance',
+  CORRECTIVE_MAINTENANCE = 'corrective_maintenance',
+  INSTALLATION = 'installation',
+  CORRECTIVE_AND_PREVENTIVE = 'corrective_and_preventive',
+}
+
 export interface Ticket {
   id: string;
-  title: string;
+  title?: string;
+  ticketType: TicketType;
   description: string;
   status: TicketStatus;
   priority: TicketPriority;
@@ -30,7 +38,7 @@ export interface Ticket {
   updatedAt: Date;
   createdBy: string;
   assignedTo?: string;
-  clientId: string; // Added this field
+  clientId: string;
   comments?: TicketComment[];
 }
 
