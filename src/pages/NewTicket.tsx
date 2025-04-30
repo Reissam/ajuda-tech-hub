@@ -38,14 +38,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Search, Plus, Check } from "lucide-react";
+import { Search, Plus, Check, Building, MapPin, City } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NewTicket = () => {
   const navigate = useNavigate();
   const { addTicket } = useTickets();
   const { user } = useAuth();
-  const { clients } = useClients(); // Usando os clientes do context
+  const { clients } = useClients(); 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
@@ -54,8 +54,10 @@ const NewTicket = () => {
   
   // Estados para o cliente selecionado
   const [selectedClient, setSelectedClient] = useState<string>("");
-  const [selectedClientName, setSelectedClientName] = useState<string>("");
   const [open, setOpen] = useState(false);
+
+  // Encontrar o cliente selecionado para mostrar suas informações
+  const selectedClientInfo = clients.find(client => client.id === selectedClient);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,7 +135,6 @@ const NewTicket = () => {
                         value={client.name}
                         onSelect={() => {
                           setSelectedClient(client.id);
-                          setSelectedClientName(client.name);
                           setOpen(false);
                         }}
                       >
@@ -161,17 +162,52 @@ const NewTicket = () => {
         </div>
       </div>
 
+      {/* Informações do cliente selecionado */}
+      {selectedClientInfo && (
+        <Card className="max-w-2xl mx-auto bg-slate-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Informações do Cliente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center mb-2">
+                  <Building className="h-4 w-4 mr-2 opacity-70" />
+                  <Label className="font-medium">Nome do Cliente:</Label>
+                </div>
+                <p className="text-sm ml-6">{selectedClientInfo.name}</p>
+                
+                <div className="flex items-center mb-2 mt-4">
+                  <Building className="h-4 w-4 mr-2 opacity-70" />
+                  <Label className="font-medium">Unidade:</Label>
+                </div>
+                <p className="text-sm ml-6">{selectedClientInfo.unit}</p>
+              </div>
+              
+              <div>
+                <div className="flex items-center mb-2">
+                  <MapPin className="h-4 w-4 mr-2 opacity-70" />
+                  <Label className="font-medium">Endereço:</Label>
+                </div>
+                <p className="text-sm ml-6">{selectedClientInfo.address}</p>
+                
+                <div className="flex items-center mb-2 mt-4">
+                  <City className="h-4 w-4 mr-2 opacity-70" />
+                  <Label className="font-medium">Cidade/Estado:</Label>
+                </div>
+                <p className="text-sm ml-6">{selectedClientInfo.city} - {selectedClientInfo.state}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
           <CardHeader>
             <CardTitle>Detalhes do Chamado</CardTitle>
             <CardDescription>
               Preencha as informações para abrir um novo chamado de suporte técnico.
-              {selectedClientName && (
-                <span className="block mt-2 font-medium">
-                  Cliente: {selectedClientName}
-                </span>
-              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
