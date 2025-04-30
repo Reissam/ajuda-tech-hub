@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "@/contexts/TicketContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { TicketPriority, TicketStatus, TicketCategory, TicketType } from "@/types/ticket";
+import { TicketPriority, TicketStatus, TicketCategory, TicketType, TicketDescriptionType } from "@/types/ticket";
 import { toast } from "sonner";
 import { ClientSearchComponent } from "@/components/tickets/ClientSearchComponent";
 import { ClientInfoCard } from "@/components/tickets/ClientInfoCard";
@@ -18,6 +18,7 @@ const NewTicket = () => {
   
   // Form state
   const [ticketType, setTicketType] = useState<TicketType>(TicketType.PREVENTIVE_MAINTENANCE);
+  const [ticketDescription, setTicketDescription] = useState<TicketDescriptionType>(TicketDescriptionType.MECHANICAL_LOCK);
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [category, setCategory] = useState<TicketCategory>(TicketCategory.SOFTWARE);
@@ -42,6 +43,7 @@ const NewTicket = () => {
 
       await addTicket({
         ticketType,
+        ticketDescription,
         description,
         status: TicketStatus.OPEN,
         priority,
@@ -77,6 +79,8 @@ const NewTicket = () => {
       <TicketDetailsForm
         ticketType={ticketType}
         setTicketType={setTicketType}
+        ticketDescription={ticketDescription}
+        setTicketDescription={setTicketDescription}
         description={description}
         setDescription={setDescription}
         priority={priority}

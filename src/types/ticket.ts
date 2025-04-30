@@ -26,10 +26,26 @@ export enum TicketType {
   CORRECTIVE_AND_PREVENTIVE = 'corrective_and_preventive',
 }
 
+export enum TicketDescriptionType {
+  MECHANICAL_LOCK = 'mechanical_lock',
+  ELECTROMAGNETIC_LOCK = 'electromagnetic_lock',
+  DELAY_LOCK = 'delay_lock',
+  ACCESS_LOCK = 'access_lock',
+  BIOMETRIC_LOCK = 'biometric_lock',
+  SAFE = 'safe',
+  FOG_GENERATOR = 'fog_generator',
+  PSDM = 'psdm',
+  DVR = 'dvr',
+  NVR = 'nvr',
+  CAMERA = 'camera',
+  ALARM = 'alarm',
+}
+
 export interface Ticket {
   id: string;
   title?: string;
   ticketType: TicketType;
+  ticketDescription: TicketDescriptionType;
   description: string;
   status: TicketStatus;
   priority: TicketPriority;

@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { TicketPriority, TicketStatus, TicketCategory, TicketType } from "@/types/ticket";
+import { TicketPriority, TicketStatus, TicketCategory, TicketType, TicketDescriptionType } from "@/types/ticket";
 import {
   Card,
   CardContent,
@@ -24,6 +24,8 @@ import {
 interface TicketFormProps {
   ticketType: TicketType;
   setTicketType: (ticketType: TicketType) => void;
+  ticketDescription: TicketDescriptionType;
+  setTicketDescription: (ticketDescription: TicketDescriptionType) => void;
   description: string;
   setDescription: (description: string) => void;
   priority: TicketPriority;
@@ -39,6 +41,8 @@ interface TicketFormProps {
 export const TicketDetailsForm = ({
   ticketType,
   setTicketType,
+  ticketDescription,
+  setTicketDescription,
   description,
   setDescription,
   priority,
@@ -74,6 +78,32 @@ export const TicketDetailsForm = ({
                 <SelectItem value={TicketType.CORRECTIVE_MAINTENANCE}>Manutenção corretiva</SelectItem>
                 <SelectItem value={TicketType.INSTALLATION}>Instalação</SelectItem>
                 <SelectItem value={TicketType.CORRECTIVE_AND_PREVENTIVE}>Manutenção Corretiva e preventiva</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="ticketDescription">Descrição de Chamado</Label>
+            <Select
+              value={ticketDescription}
+              onValueChange={(value) => setTicketDescription(value as TicketDescriptionType)}
+            >
+              <SelectTrigger id="ticketDescription">
+                <SelectValue placeholder="Selecione a descrição do chamado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TicketDescriptionType.MECHANICAL_LOCK}>Fechadura mecânica</SelectItem>
+                <SelectItem value={TicketDescriptionType.ELECTROMAGNETIC_LOCK}>Fechadura eletromagnética</SelectItem>
+                <SelectItem value={TicketDescriptionType.DELAY_LOCK}>Fechadura de retardo</SelectItem>
+                <SelectItem value={TicketDescriptionType.ACCESS_LOCK}>Fechadura de acesso</SelectItem>
+                <SelectItem value={TicketDescriptionType.BIOMETRIC_LOCK}>Fechadura de biometria</SelectItem>
+                <SelectItem value={TicketDescriptionType.SAFE}>Cofre</SelectItem>
+                <SelectItem value={TicketDescriptionType.FOG_GENERATOR}>Gerador de Neblina</SelectItem>
+                <SelectItem value={TicketDescriptionType.PSDM}>PSDM</SelectItem>
+                <SelectItem value={TicketDescriptionType.DVR}>DVR</SelectItem>
+                <SelectItem value={TicketDescriptionType.NVR}>NVR</SelectItem>
+                <SelectItem value={TicketDescriptionType.CAMERA}>Câmera</SelectItem>
+                <SelectItem value={TicketDescriptionType.ALARM}>Alarme</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -1,6 +1,6 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Ticket, TicketStatus, TicketPriority, TicketCategory, TicketComment } from "@/types/ticket";
+import { Ticket, TicketStatus, TicketPriority, TicketCategory, TicketComment, TicketType, TicketDescriptionType } from "@/types/ticket";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,8 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       const formattedTickets: Ticket[] = ticketsData.map(ticket => ({
         id: ticket.id,
         title: ticket.title,
+        ticketType: ticket.ticket_type || TicketType.PREVENTIVE_MAINTENANCE,
+        ticketDescription: ticket.ticket_description || TicketDescriptionType.MECHANICAL_LOCK,
         description: ticket.description,
         status: ticket.status as TicketStatus,
         priority: ticket.priority as TicketPriority,
@@ -97,6 +99,8 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
         .from('tickets')
         .insert([{
           title: ticketData.title,
+          ticket_type: ticketData.ticketType,
+          ticket_description: ticketData.ticketDescription,
           description: ticketData.description,
           status: ticketData.status,
           priority: ticketData.priority,
@@ -118,6 +122,8 @@ export const TicketProvider = ({ children }: { children: ReactNode }) => {
       const newTicket: Ticket = {
         id: data.id,
         title: data.title,
+        ticketType: data.ticket_type || TicketType.PREVENTIVE_MAINTENANCE,
+        ticketDescription: data.ticket_description || TicketDescriptionType.MECHANICAL_LOCK,
         description: data.description,
         status: data.status as TicketStatus,
         priority: data.priority as TicketPriority,
