@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -67,7 +66,6 @@ const ClientRegistration = () => {
       setIsSubmitting(true);
       console.log("Dados do formulário:", data);
       
-      // Usar a função addClient do contexto
       await addClient({
         name: data.name,
         unit: data.unit,

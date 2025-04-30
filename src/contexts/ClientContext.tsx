@@ -63,18 +63,16 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Todos os campos são obrigatórios");
       }
 
-      // Criar objeto para inserção
-      const insertData = {
-        name: clientData.name,
-        unit: clientData.unit,
-        address: clientData.address,
-        city: clientData.city,
-        state: clientData.state
-      };
-
+      // Criar objeto para inserção no formato esperado pelo Supabase
       const { data, error } = await supabase
         .from('clients')
-        .insert([insertData])
+        .insert({
+          name: clientData.name,
+          unit: clientData.unit,
+          address: clientData.address,
+          city: clientData.city,
+          state: clientData.state
+        })
         .select('*')
         .single();
       
