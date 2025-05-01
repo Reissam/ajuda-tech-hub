@@ -295,42 +295,78 @@ export type Database = {
       }
       tickets: {
         Row: {
+          arrival_time: string | null
           assigned_to: string | null
           category: string
           client_id: string
+          client_verified: boolean | null
+          confirmed_issue: string | null
           created_at: string
           created_by: string | null
+          departure_time: string | null
           description: string
           id: string
+          is_working: boolean | null
           priority: string
+          reported_issue: string | null
+          service_completed: boolean | null
+          service_date: string | null
+          service_performed: string | null
           status: string
+          ticket_description: string | null
+          ticket_type: string | null
           title: string
+          under_warranty: boolean | null
           updated_at: string
         }
         Insert: {
+          arrival_time?: string | null
           assigned_to?: string | null
           category: string
           client_id: string
+          client_verified?: boolean | null
+          confirmed_issue?: string | null
           created_at?: string
           created_by?: string | null
+          departure_time?: string | null
           description: string
           id?: string
+          is_working?: boolean | null
           priority: string
+          reported_issue?: string | null
+          service_completed?: boolean | null
+          service_date?: string | null
+          service_performed?: string | null
           status: string
+          ticket_description?: string | null
+          ticket_type?: string | null
           title: string
+          under_warranty?: boolean | null
           updated_at?: string
         }
         Update: {
+          arrival_time?: string | null
           assigned_to?: string | null
           category?: string
           client_id?: string
+          client_verified?: boolean | null
+          confirmed_issue?: string | null
           created_at?: string
           created_by?: string | null
+          departure_time?: string | null
           description?: string
           id?: string
+          is_working?: boolean | null
           priority?: string
+          reported_issue?: string | null
+          service_completed?: boolean | null
+          service_date?: string | null
+          service_performed?: string | null
           status?: string
+          ticket_description?: string | null
+          ticket_type?: string | null
           title?: string
+          under_warranty?: boolean | null
           updated_at?: string
         }
         Relationships: [

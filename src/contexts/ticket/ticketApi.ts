@@ -74,7 +74,7 @@ export async function createTicket(
   userId: string
 ): Promise<Ticket> {
   try {
-    // Prepare data for insertion, only include fields that exist in the database
+    // Prepare data for insertion with all the columns that now exist in the database
     const insertData: any = {
       title: ticketData.title,
       ticket_type: ticketData.ticketType,
@@ -87,14 +87,17 @@ export async function createTicket(
       priority: ticketData.priority,
       category: ticketData.category,
       created_by: userId,
-      client_id: ticketData.clientId
+      client_id: ticketData.clientId,
+      under_warranty: ticketData.underWarranty,
+      is_working: ticketData.isWorking,
+      service_completed: ticketData.serviceCompleted,
+      client_verified: ticketData.clientVerified
     };
 
-    // Only add these fields if they exist in the ticket data
-    if (ticketData.underWarranty !== undefined) insertData.under_warranty = ticketData.underWarranty;
-    if (ticketData.isWorking !== undefined) insertData.is_working = ticketData.isWorking;
-    if (ticketData.serviceCompleted !== undefined) insertData.service_completed = ticketData.serviceCompleted;
-    if (ticketData.clientVerified !== undefined) insertData.client_verified = ticketData.clientVerified;
+    // Only add time and date fields if they have values
+    if (ticketData.arrivalTime) insertData.arrival_time = ticketData.arrivalTime;
+    if (ticketData.departureTime) insertData.departure_time = ticketData.departureTime;
+    if (ticketData.serviceDate) insertData.service_date = ticketData.serviceDate;
     
     // Insert new ticket to Supabase
     const { data, error } = await supabase
@@ -167,6 +170,9 @@ export async function updateTicketById(
     if (updates.isWorking !== undefined) updateData.is_working = updates.isWorking;
     if (updates.serviceCompleted !== undefined) updateData.service_completed = updates.serviceCompleted;
     if (updates.clientVerified !== undefined) updateData.client_verified = updates.clientVerified;
+    if (updates.arrivalTime) updateData.arrival_time = updates.arrivalTime;
+    if (updates.departureTime) updateData.departure_time = updates.departureTime;
+    if (updates.serviceDate) updateData.service_date = updates.serviceDate;
     
     // Update in Supabase
     const { error } = await supabase

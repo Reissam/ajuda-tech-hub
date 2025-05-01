@@ -65,7 +65,6 @@ const NewTicket = () => {
         throw new Error("Usuário não autenticado");
       }
 
-      // Criar objeto de ticket base
       const ticketData = {
         ticketType,
         ticketDescription,
@@ -83,13 +82,10 @@ const NewTicket = () => {
         isWorking,
         serviceCompleted,
         clientVerified,
+        arrivalTime,
+        departureTime,
+        serviceDate
       };
-
-      // Adicionar campos opcionais somente se forem necessários
-      // Isso evita enviar campos que podem não existir no banco de dados
-      if (arrivalTime) Object.assign(ticketData, { arrivalTime });
-      if (departureTime) Object.assign(ticketData, { departureTime });
-      if (serviceDate) Object.assign(ticketData, { serviceDate });
 
       await addTicket(ticketData);
 
