@@ -9,6 +9,7 @@ import { ClientSearchComponent } from "@/components/tickets/ClientSearchComponen
 import { ClientInfoCard } from "@/components/tickets/ClientInfoCard";
 import { TicketDetailsForm } from "@/components/tickets/TicketDetailsForm";
 import { useClients } from "@/contexts/ClientContext";
+import { UserRole } from "@/types/user";
 
 const NewTicket = () => {
   const navigate = useNavigate();
@@ -37,12 +38,25 @@ const NewTicket = () => {
 
   // Encontrar o cliente selecionado para mostrar suas informações
   const selectedClientInfo = clients.find(client => client.id === selectedClient);
+  
+  // Verificar se o usuário é gestor ou administrador
+  const isManagerOrAdmin = user?.role === UserRole.MANAGER || user?.role === UserRole.ADMIN;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || !selectedClient || !reportedIssue) {
-      toast.error("Por favor, preencha todos os campos obrigatórios");
-      return;
+    
+    // Validação diferente para gestores/admins - apenas "reportedIssue" obrigatório
+    if (isManagerOrAdmin) {
+      if (!reportedIssue || !selectedClient) {
+        toast.error("Por favor, preencha o cliente e o defeito informado");
+        return;
+      }
+    } else {
+      // Para outros usuários, mantém a validação original
+      if (!description || !selectedClient || !reportedIssue) {
+        toast.error("Por favor, preencha todos os campos obrigatórios");
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -54,7 +68,8 @@ const NewTicket = () => {
       await addTicket({
         ticketType,
         ticketDescription,
-        description,
+        // Para gestores/admins, se description estiver vazio, use reportedIssue
+        description: isManagerOrAdmin && !description.trim() ? reportedIssue : description,
         reportedIssue,
         confirmedIssue,
         servicePerformed,
@@ -72,6 +87,7 @@ const NewTicket = () => {
         serviceDate
       });
 
+      toast.success("Chamado aberto com sucesso!");
       navigate("/tickets");
     } catch (error) {
       console.error("Erro ao abrir chamado:", error);
@@ -131,6 +147,7 @@ const NewTicket = () => {
         setDepartureTime={setDepartureTime}
         serviceDate={serviceDate}
         setServiceDate={setServiceDate}
+        isManagerOrAdmin={isManagerOrAdmin}
       />
     </div>
   );

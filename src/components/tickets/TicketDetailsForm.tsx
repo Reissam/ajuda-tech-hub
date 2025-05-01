@@ -62,6 +62,7 @@ interface TicketFormProps {
   setDepartureTime: (time: string) => void;
   serviceDate: Date | undefined;
   setServiceDate: (date: Date | undefined) => void;
+  isManagerOrAdmin?: boolean;
 }
 
 export const TicketDetailsForm = ({
@@ -98,7 +99,8 @@ export const TicketDetailsForm = ({
   departureTime,
   setDepartureTime,
   serviceDate,
-  setServiceDate
+  setServiceDate,
+  isManagerOrAdmin = false
 }: TicketFormProps) => {
   return (
     <Card className="max-w-2xl mx-auto">
@@ -107,6 +109,11 @@ export const TicketDetailsForm = ({
           <CardTitle>Detalhes do Chamado</CardTitle>
           <CardDescription>
             Preencha as informações para abrir um novo chamado de suporte técnico.
+            {isManagerOrAdmin && (
+              <span className="block mt-1 text-blue-500">
+                Apenas o campo "Defeito Informado" é obrigatório para gestores e administradores.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -155,14 +162,17 @@ export const TicketDetailsForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reportedIssue">Defeito Informado</Label>
+            <Label htmlFor="reportedIssue" className="flex items-center">
+              Defeito Informado
+              {isManagerOrAdmin && <span className="ml-1 text-red-500">*</span>}
+            </Label>
             <Textarea
               id="reportedIssue"
               placeholder="Descreva o defeito informado pelo cliente"
               rows={3}
               value={reportedIssue}
               onChange={(e) => setReportedIssue(e.target.value)}
-              required
+              required={true}
             />
           </div>
 
@@ -189,14 +199,17 @@ export const TicketDetailsForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Observações</Label>
+            <Label htmlFor="description" className={isManagerOrAdmin ? "" : "flex items-center"}>
+              Observações
+              {!isManagerOrAdmin && <span className="ml-1 text-red-500">*</span>}
+            </Label>
             <Textarea
               id="description"
               placeholder="Observações adicionais sobre o chamado"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
+              required={!isManagerOrAdmin}
             />
           </div>
 
