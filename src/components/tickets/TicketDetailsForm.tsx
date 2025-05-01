@@ -28,6 +28,12 @@ interface TicketFormProps {
   setTicketDescription: (ticketDescription: TicketDescriptionType) => void;
   description: string;
   setDescription: (description: string) => void;
+  reportedIssue: string;
+  setReportedIssue: (reportedIssue: string) => void;
+  confirmedIssue: string;
+  setConfirmedIssue: (confirmedIssue: string) => void;
+  servicePerformed: string;
+  setServicePerformed: (servicePerformed: string) => void;
   priority: TicketPriority;
   setPriority: (priority: TicketPriority) => void;
   category: TicketCategory;
@@ -45,6 +51,12 @@ export const TicketDetailsForm = ({
   setTicketDescription,
   description,
   setDescription,
+  reportedIssue,
+  setReportedIssue,
+  confirmedIssue,
+  setConfirmedIssue,
+  servicePerformed,
+  setServicePerformed,
   priority,
   setPriority,
   category,
@@ -109,11 +121,45 @@ export const TicketDetailsForm = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="reportedIssue">Defeito Informado</Label>
+            <Textarea
+              id="reportedIssue"
+              placeholder="Descreva o defeito informado pelo cliente"
+              rows={3}
+              value={reportedIssue}
+              onChange={(e) => setReportedIssue(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirmedIssue">Defeito Constatado</Label>
+            <Textarea
+              id="confirmedIssue"
+              placeholder="Descreva o defeito constatado após análise"
+              rows={3}
+              value={confirmedIssue}
+              onChange={(e) => setConfirmedIssue(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="servicePerformed">Serviço Executado</Label>
+            <Textarea
+              id="servicePerformed"
+              placeholder="Descreva o serviço que foi executado"
+              rows={3}
+              value={servicePerformed}
+              onChange={(e) => setServicePerformed(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Observações</Label>
             <Textarea
               id="description"
-              placeholder="Descreva detalhadamente o problema que você está enfrentando"
-              rows={5}
+              placeholder="Observações adicionais sobre o chamado"
+              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required

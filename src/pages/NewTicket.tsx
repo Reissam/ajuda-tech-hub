@@ -20,6 +20,9 @@ const NewTicket = () => {
   const [ticketType, setTicketType] = useState<TicketType>(TicketType.PREVENTIVE_MAINTENANCE);
   const [ticketDescription, setTicketDescription] = useState<TicketDescriptionType>(TicketDescriptionType.MECHANICAL_LOCK);
   const [description, setDescription] = useState("");
+  const [reportedIssue, setReportedIssue] = useState("");
+  const [confirmedIssue, setConfirmedIssue] = useState("");
+  const [servicePerformed, setServicePerformed] = useState("");
   const [priority, setPriority] = useState<TicketPriority>(TicketPriority.MEDIUM);
   const [category, setCategory] = useState<TicketCategory>(TicketCategory.SOFTWARE);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -30,7 +33,7 @@ const NewTicket = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description || !selectedClient) {
+    if (!description || !selectedClient || !reportedIssue) {
       toast.error("Por favor, preencha todos os campos obrigatórios");
       return;
     }
@@ -45,6 +48,9 @@ const NewTicket = () => {
         ticketType,
         ticketDescription,
         description,
+        reportedIssue,
+        confirmedIssue,
+        servicePerformed,
         status: TicketStatus.OPEN,
         priority,
         category,
@@ -83,6 +89,12 @@ const NewTicket = () => {
         setTicketDescription={setTicketDescription}
         description={description}
         setDescription={setDescription}
+        reportedIssue={reportedIssue}
+        setReportedIssue={setReportedIssue}
+        confirmedIssue={confirmedIssue}
+        setConfirmedIssue={setConfirmedIssue}
+        servicePerformed={servicePerformed}
+        setServicePerformed={setServicePerformed}
         priority={priority}
         setPriority={setPriority}
         category={category}

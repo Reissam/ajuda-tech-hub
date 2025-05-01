@@ -47,6 +47,9 @@ export interface Ticket {
   ticketType: TicketType;
   ticketDescription: TicketDescriptionType;
   description: string;
+  reportedIssue?: string;
+  confirmedIssue?: string;
+  servicePerformed?: string;
   status: TicketStatus;
   priority: TicketPriority;
   category: TicketCategory;
