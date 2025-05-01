@@ -1,6 +1,6 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useTickets } from "@/contexts/TicketContext";
+import { useTickets } from "@/contexts/ticket"; // Updated import path
 import { UserRole } from "@/types/user";
 import { TicketStatus, TicketPriority } from "@/types/ticket";
 import {

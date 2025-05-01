@@ -128,6 +128,11 @@ export async function updateTicketById(
     if (updates.priority) updateData.priority = updates.priority;
     if (updates.category) updateData.category = updates.category;
     if (updates.assignedTo) updateData.assigned_to = updates.assignedTo;
+    if (updates.reportedIssue) updateData.reported_issue = updates.reportedIssue;
+    if (updates.confirmedIssue) updateData.confirmed_issue = updates.confirmedIssue;
+    if (updates.servicePerformed) updateData.service_performed = updates.servicePerformed;
+    if (updates.ticketType) updateData.ticket_type = updates.ticketType;
+    if (updates.ticketDescription) updateData.ticket_description = updates.ticketDescription;
     
     // Update in Supabase
     const { error } = await supabase
