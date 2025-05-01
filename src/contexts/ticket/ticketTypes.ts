@@ -32,6 +32,9 @@ export interface Ticket {
   isWorking?: boolean;
   serviceCompleted?: boolean;
   clientVerified?: boolean;
+  arrivalTime?: string;
+  departureTime?: string;
+  serviceDate?: Date;
 }
 
 export interface TicketComment {

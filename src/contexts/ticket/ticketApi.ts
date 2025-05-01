@@ -20,39 +20,47 @@ export async function fetchTickets(): Promise<Ticket[]> {
     }
 
     // Transform the data to match our application format
-    const formattedTickets: Ticket[] = ticketsData.map(ticket => ({
-      id: ticket.id,
-      title: ticket.title,
-      ticketType: (ticket.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
-      ticketDescription: (ticket.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
-      description: ticket.description,
-      reportedIssue: ticket.reported_issue,
-      confirmedIssue: ticket.confirmed_issue,
-      servicePerformed: ticket.service_performed,
-      status: ticket.status as TicketStatus,
-      priority: ticket.priority as TicketPriority,
-      category: ticket.category as TicketCategory,
-      createdAt: new Date(ticket.created_at),
-      updatedAt: new Date(ticket.updated_at),
-      createdBy: ticket.created_by || '',
-      assignedTo: ticket.assigned_to,
-      clientId: ticket.client_id,
-      underWarranty: ticket.under_warranty,
-      isWorking: ticket.is_working,
-      serviceCompleted: ticket.service_completed,
-      clientVerified: ticket.client_verified,
-      comments: ticket.ticket_comments ? ticket.ticket_comments.map((comment: any) => ({
-        id: comment.id,
-        content: comment.content,
-        createdAt: new Date(comment.created_at),
-        createdBy: comment.created_by,
-        attachments: comment.attachments ? 
-          (Array.isArray(comment.attachments) ? 
-            comment.attachments.map(a => String(a)) : 
-            [String(comment.attachments)]
-          ) : []
-      })) : []
-    }));
+    const formattedTickets: Ticket[] = ticketsData.map(ticket => {
+      // Type assertion for TypeScript
+      const ticketData = ticket as any;
+      
+      return {
+        id: ticketData.id,
+        title: ticketData.title,
+        ticketType: (ticketData.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
+        ticketDescription: (ticketData.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
+        description: ticketData.description,
+        reportedIssue: ticketData.reported_issue,
+        confirmedIssue: ticketData.confirmed_issue,
+        servicePerformed: ticketData.service_performed,
+        status: ticketData.status as TicketStatus,
+        priority: ticketData.priority as TicketPriority,
+        category: ticketData.category as TicketCategory,
+        createdAt: new Date(ticketData.created_at),
+        updatedAt: new Date(ticketData.updated_at),
+        createdBy: ticketData.created_by || '',
+        assignedTo: ticketData.assigned_to,
+        clientId: ticketData.client_id,
+        underWarranty: ticketData.under_warranty,
+        isWorking: ticketData.is_working,
+        serviceCompleted: ticketData.service_completed,
+        clientVerified: ticketData.client_verified,
+        arrivalTime: ticketData.arrival_time,
+        departureTime: ticketData.departure_time,
+        serviceDate: ticketData.service_date ? new Date(ticketData.service_date) : undefined,
+        comments: ticketData.ticket_comments ? ticketData.ticket_comments.map((comment: any) => ({
+          id: comment.id,
+          content: comment.content,
+          createdAt: new Date(comment.created_at),
+          createdBy: comment.created_by,
+          attachments: comment.attachments ? 
+            (Array.isArray(comment.attachments) ? 
+              comment.attachments.map(a => String(a)) : 
+              [String(comment.attachments)]
+            ) : []
+        })) : []
+      };
+    });
 
     return formattedTickets;
   } catch (error) {
@@ -85,7 +93,10 @@ export async function createTicket(
         under_warranty: ticketData.underWarranty,
         is_working: ticketData.isWorking,
         service_completed: ticketData.serviceCompleted,
-        client_verified: ticketData.clientVerified
+        client_verified: ticketData.clientVerified,
+        arrival_time: ticketData.arrivalTime,
+        departure_time: ticketData.departureTime,
+        service_date: ticketData.serviceDate
       }])
       .select('*')
       .single();
@@ -96,15 +107,17 @@ export async function createTicket(
     }
 
     // Convert the response to our Ticket format
+    const dataAsAny = data as any;
+    
     const newTicket: Ticket = {
       id: data.id,
       title: data.title,
-      ticketType: (data.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
-      ticketDescription: (data.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
+      ticketType: (dataAsAny.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
+      ticketDescription: (dataAsAny.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
       description: data.description,
-      reportedIssue: data.reported_issue,
-      confirmedIssue: data.confirmed_issue,
-      servicePerformed: data.service_performed,
+      reportedIssue: dataAsAny.reported_issue,
+      confirmedIssue: dataAsAny.confirmed_issue,
+      servicePerformed: dataAsAny.service_performed,
       status: data.status as TicketStatus,
       priority: data.priority as TicketPriority,
       category: data.category as TicketCategory,
@@ -113,10 +126,13 @@ export async function createTicket(
       createdBy: data.created_by || userId,
       assignedTo: data.assigned_to,
       clientId: data.client_id,
-      underWarranty: data.under_warranty,
-      isWorking: data.is_working,
-      serviceCompleted: data.service_completed,
-      clientVerified: data.client_verified,
+      underWarranty: dataAsAny.under_warranty,
+      isWorking: dataAsAny.is_working,
+      serviceCompleted: dataAsAny.service_completed,
+      clientVerified: dataAsAny.client_verified,
+      arrivalTime: dataAsAny.arrival_time,
+      departureTime: dataAsAny.departure_time,
+      serviceDate: dataAsAny.service_date ? new Date(dataAsAny.service_date) : undefined,
       comments: []
     };
 
@@ -149,6 +165,9 @@ export async function updateTicketById(
     if (updates.isWorking !== undefined) updateData.is_working = updates.isWorking;
     if (updates.serviceCompleted !== undefined) updateData.service_completed = updates.serviceCompleted;
     if (updates.clientVerified !== undefined) updateData.client_verified = updates.clientVerified;
+    if (updates.arrivalTime !== undefined) updateData.arrival_time = updates.arrivalTime;
+    if (updates.departureTime !== undefined) updateData.departure_time = updates.departureTime;
+    if (updates.serviceDate !== undefined) updateData.service_date = updates.serviceDate;
     
     // Update in Supabase
     const { error } = await supabase

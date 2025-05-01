@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -20,6 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TicketFormProps {
   ticketType: TicketType;
@@ -50,6 +56,12 @@ interface TicketFormProps {
   setServiceCompleted: (serviceCompleted: boolean) => void;
   clientVerified: boolean;
   setClientVerified: (clientVerified: boolean) => void;
+  arrivalTime: string;
+  setArrivalTime: (time: string) => void;
+  departureTime: string;
+  setDepartureTime: (time: string) => void;
+  serviceDate: Date | undefined;
+  setServiceDate: (date: Date | undefined) => void;
 }
 
 export const TicketDetailsForm = ({
@@ -80,7 +92,13 @@ export const TicketDetailsForm = ({
   serviceCompleted,
   setServiceCompleted,
   clientVerified,
-  setClientVerified
+  setClientVerified,
+  arrivalTime,
+  setArrivalTime,
+  departureTime,
+  setDepartureTime,
+  serviceDate,
+  setServiceDate
 }: TicketFormProps) => {
   return (
     <Card className="max-w-2xl mx-auto">
@@ -275,6 +293,58 @@ export const TicketDetailsForm = ({
                 <SelectItem value={TicketPriority.HIGH}>Alta</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+          
+          {/* New fields for service time and date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="arrivalTime">Horário de Chegada</Label>
+              <Input
+                id="arrivalTime"
+                type="time"
+                value={arrivalTime}
+                onChange={(e) => setArrivalTime(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="departureTime">Horário de Saída</Label>
+              <Input
+                id="departureTime"
+                type="time"
+                value={departureTime}
+                onChange={(e) => setDepartureTime(e.target.value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="serviceDate">Data do Atendimento</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left",
+                    !serviceDate && "text-muted-foreground"
+                  )}
+                  id="serviceDate"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {serviceDate ? format(serviceDate, "dd/MM/yyyy") : "Selecione uma data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={serviceDate}
+                  onSelect={setServiceDate}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </CardContent>
 

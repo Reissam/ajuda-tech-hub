@@ -31,6 +31,9 @@ const NewTicket = () => {
   const [isWorking, setIsWorking] = useState(false);
   const [serviceCompleted, setServiceCompleted] = useState(false);
   const [clientVerified, setClientVerified] = useState(false);
+  const [arrivalTime, setArrivalTime] = useState("");
+  const [departureTime, setDepartureTime] = useState("");
+  const [serviceDate, setServiceDate] = useState<Date | undefined>(undefined);
 
   // Encontrar o cliente selecionado para mostrar suas informações
   const selectedClientInfo = clients.find(client => client.id === selectedClient);
@@ -63,7 +66,10 @@ const NewTicket = () => {
         underWarranty,
         isWorking,
         serviceCompleted,
-        clientVerified
+        clientVerified,
+        arrivalTime,
+        departureTime,
+        serviceDate
       });
 
       navigate("/tickets");
@@ -119,6 +125,12 @@ const NewTicket = () => {
         setServiceCompleted={setServiceCompleted}
         clientVerified={clientVerified}
         setClientVerified={setClientVerified}
+        arrivalTime={arrivalTime}
+        setArrivalTime={setArrivalTime}
+        departureTime={departureTime}
+        setDepartureTime={setDepartureTime}
+        serviceDate={serviceDate}
+        setServiceDate={setServiceDate}
       />
     </div>
   );
