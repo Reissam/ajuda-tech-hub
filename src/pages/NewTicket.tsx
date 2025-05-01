@@ -27,6 +27,7 @@ const NewTicket = () => {
   const [category, setCategory] = useState<TicketCategory>(TicketCategory.SOFTWARE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string>("");
+  const [underWarranty, setUnderWarranty] = useState(false);
 
   // Encontrar o cliente selecionado para mostrar suas informações
   const selectedClientInfo = clients.find(client => client.id === selectedClient);
@@ -56,6 +57,7 @@ const NewTicket = () => {
         category,
         createdBy: user.id,
         clientId: selectedClient,
+        underWarranty
       });
 
       navigate("/tickets");
@@ -103,6 +105,8 @@ const NewTicket = () => {
         handleSubmit={handleSubmit}
         handleCancel={() => navigate("/tickets")}
         hasSelectedClient={!!selectedClient}
+        underWarranty={underWarranty}
+        setUnderWarranty={setUnderWarranty}
       />
     </div>
   );

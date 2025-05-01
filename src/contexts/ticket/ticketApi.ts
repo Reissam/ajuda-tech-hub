@@ -37,6 +37,7 @@ export async function fetchTickets(): Promise<Ticket[]> {
       createdBy: ticket.created_by || '',
       assignedTo: ticket.assigned_to,
       clientId: ticket.client_id,
+      underWarranty: ticket.under_warranty,
       comments: ticket.ticket_comments ? ticket.ticket_comments.map((comment: any) => ({
         id: comment.id,
         content: comment.content,
@@ -77,7 +78,8 @@ export async function createTicket(
         priority: ticketData.priority,
         category: ticketData.category,
         created_by: userId,
-        client_id: ticketData.clientId
+        client_id: ticketData.clientId,
+        under_warranty: ticketData.underWarranty
       }])
       .select('*')
       .single();
@@ -105,6 +107,7 @@ export async function createTicket(
       createdBy: data.created_by || userId,
       assignedTo: data.assigned_to,
       clientId: data.client_id,
+      underWarranty: data.under_warranty,
       comments: []
     };
 
@@ -133,6 +136,7 @@ export async function updateTicketById(
     if (updates.servicePerformed) updateData.service_performed = updates.servicePerformed;
     if (updates.ticketType) updateData.ticket_type = updates.ticketType;
     if (updates.ticketDescription) updateData.ticket_description = updates.ticketDescription;
+    if (updates.underWarranty !== undefined) updateData.under_warranty = updates.underWarranty;
     
     // Update in Supabase
     const { error } = await supabase

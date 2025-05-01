@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface TicketFormProps {
   ticketType: TicketType;
@@ -42,6 +43,8 @@ interface TicketFormProps {
   handleSubmit: (e: React.FormEvent) => void;
   handleCancel: () => void;
   hasSelectedClient: boolean;
+  underWarranty: boolean;
+  setUnderWarranty: (underWarranty: boolean) => void;
 }
 
 export const TicketDetailsForm = ({
@@ -64,7 +67,9 @@ export const TicketDetailsForm = ({
   isSubmitting,
   handleSubmit,
   handleCancel,
-  hasSelectedClient
+  hasSelectedClient,
+  underWarranty,
+  setUnderWarranty
 }: TicketFormProps) => {
   return (
     <Card className="max-w-2xl mx-auto">
@@ -164,6 +169,25 @@ export const TicketDetailsForm = ({
               onChange={(e) => setDescription(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="warranty">Em garantia</Label>
+            <RadioGroup 
+              id="warranty" 
+              value={underWarranty ? "yes" : "no"}
+              onValueChange={(value) => setUnderWarranty(value === "yes")}
+              className="flex items-center gap-4 pt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="yes" id="warranty-yes" />
+                <Label htmlFor="warranty-yes" className="cursor-pointer">Sim</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="no" id="warranty-no" />
+                <Label htmlFor="warranty-no" className="cursor-pointer">Não</Label>
+              </div>
+            </RadioGroup>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -28,6 +28,7 @@ export interface Ticket {
   assignedTo?: string;
   clientId: string;
   comments?: TicketComment[];
+  underWarranty?: boolean;
 }
 
 export interface TicketComment {
