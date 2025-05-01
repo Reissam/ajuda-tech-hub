@@ -28,6 +28,9 @@ const NewTicket = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string>("");
   const [underWarranty, setUnderWarranty] = useState(false);
+  const [isWorking, setIsWorking] = useState(false);
+  const [serviceCompleted, setServiceCompleted] = useState(false);
+  const [clientVerified, setClientVerified] = useState(false);
 
   // Encontrar o cliente selecionado para mostrar suas informações
   const selectedClientInfo = clients.find(client => client.id === selectedClient);
@@ -57,7 +60,10 @@ const NewTicket = () => {
         category,
         createdBy: user.id,
         clientId: selectedClient,
-        underWarranty
+        underWarranty,
+        isWorking,
+        serviceCompleted,
+        clientVerified
       });
 
       navigate("/tickets");
@@ -107,6 +113,12 @@ const NewTicket = () => {
         hasSelectedClient={!!selectedClient}
         underWarranty={underWarranty}
         setUnderWarranty={setUnderWarranty}
+        isWorking={isWorking}
+        setIsWorking={setIsWorking}
+        serviceCompleted={serviceCompleted}
+        setServiceCompleted={setServiceCompleted}
+        clientVerified={clientVerified}
+        setClientVerified={setClientVerified}
       />
     </div>
   );

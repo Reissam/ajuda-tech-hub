@@ -45,6 +45,12 @@ interface TicketFormProps {
   hasSelectedClient: boolean;
   underWarranty: boolean;
   setUnderWarranty: (underWarranty: boolean) => void;
+  isWorking: boolean;
+  setIsWorking: (isWorking: boolean) => void;
+  serviceCompleted: boolean;
+  setServiceCompleted: (serviceCompleted: boolean) => void;
+  clientVerified: boolean;
+  setClientVerified: (clientVerified: boolean) => void;
 }
 
 export const TicketDetailsForm = ({
@@ -69,7 +75,13 @@ export const TicketDetailsForm = ({
   handleCancel,
   hasSelectedClient,
   underWarranty,
-  setUnderWarranty
+  setUnderWarranty,
+  isWorking,
+  setIsWorking,
+  serviceCompleted,
+  setServiceCompleted,
+  clientVerified,
+  setClientVerified
 }: TicketFormProps) => {
   return (
     <Card className="max-w-2xl mx-auto">
@@ -171,23 +183,82 @@ export const TicketDetailsForm = ({
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="warranty">Em garantia</Label>
-            <RadioGroup 
-              id="warranty" 
-              value={underWarranty ? "yes" : "no"}
-              onValueChange={(value) => setUnderWarranty(value === "yes")}
-              className="flex items-center gap-4 pt-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="warranty-yes" />
-                <Label htmlFor="warranty-yes" className="cursor-pointer">Sim</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="warranty-no" />
-                <Label htmlFor="warranty-no" className="cursor-pointer">Não</Label>
-              </div>
-            </RadioGroup>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="warranty">Em garantia</Label>
+              <RadioGroup 
+                id="warranty" 
+                value={underWarranty ? "yes" : "no"}
+                onValueChange={(value) => setUnderWarranty(value === "yes")}
+                className="flex items-center gap-4 pt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="warranty-yes" />
+                  <Label htmlFor="warranty-yes" className="cursor-pointer">Sim</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="warranty-no" />
+                  <Label htmlFor="warranty-no" className="cursor-pointer">Não</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="working">Em funcionamento</Label>
+              <RadioGroup 
+                id="working" 
+                value={isWorking ? "yes" : "no"}
+                onValueChange={(value) => setIsWorking(value === "yes")}
+                className="flex items-center gap-4 pt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="working-yes" />
+                  <Label htmlFor="working-yes" className="cursor-pointer">Sim</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="working-no" />
+                  <Label htmlFor="working-no" className="cursor-pointer">Não</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="completed">Serviço concluído</Label>
+              <RadioGroup 
+                id="completed" 
+                value={serviceCompleted ? "yes" : "no"}
+                onValueChange={(value) => setServiceCompleted(value === "yes")}
+                className="flex items-center gap-4 pt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="completed-yes" />
+                  <Label htmlFor="completed-yes" className="cursor-pointer">Sim</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="completed-no" />
+                  <Label htmlFor="completed-no" className="cursor-pointer">Não</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="verified">Verificado pelo Cliente</Label>
+              <RadioGroup 
+                id="verified" 
+                value={clientVerified ? "yes" : "no"}
+                onValueChange={(value) => setClientVerified(value === "yes")}
+                className="flex items-center gap-4 pt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="yes" id="verified-yes" />
+                  <Label htmlFor="verified-yes" className="cursor-pointer">Sim</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="no" id="verified-no" />
+                  <Label htmlFor="verified-no" className="cursor-pointer">Não</Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

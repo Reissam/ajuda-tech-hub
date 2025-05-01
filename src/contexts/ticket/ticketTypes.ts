@@ -29,6 +29,9 @@ export interface Ticket {
   clientId: string;
   comments?: TicketComment[];
   underWarranty?: boolean;
+  isWorking?: boolean;
+  serviceCompleted?: boolean;
+  clientVerified?: boolean;
 }
 
 export interface TicketComment {

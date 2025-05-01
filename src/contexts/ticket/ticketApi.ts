@@ -38,6 +38,9 @@ export async function fetchTickets(): Promise<Ticket[]> {
       assignedTo: ticket.assigned_to,
       clientId: ticket.client_id,
       underWarranty: ticket.under_warranty,
+      isWorking: ticket.is_working,
+      serviceCompleted: ticket.service_completed,
+      clientVerified: ticket.client_verified,
       comments: ticket.ticket_comments ? ticket.ticket_comments.map((comment: any) => ({
         id: comment.id,
         content: comment.content,
@@ -79,7 +82,10 @@ export async function createTicket(
         category: ticketData.category,
         created_by: userId,
         client_id: ticketData.clientId,
-        under_warranty: ticketData.underWarranty
+        under_warranty: ticketData.underWarranty,
+        is_working: ticketData.isWorking,
+        service_completed: ticketData.serviceCompleted,
+        client_verified: ticketData.clientVerified
       }])
       .select('*')
       .single();
@@ -108,6 +114,9 @@ export async function createTicket(
       assignedTo: data.assigned_to,
       clientId: data.client_id,
       underWarranty: data.under_warranty,
+      isWorking: data.is_working,
+      serviceCompleted: data.service_completed,
+      clientVerified: data.client_verified,
       comments: []
     };
 
@@ -137,6 +146,9 @@ export async function updateTicketById(
     if (updates.ticketType) updateData.ticket_type = updates.ticketType;
     if (updates.ticketDescription) updateData.ticket_description = updates.ticketDescription;
     if (updates.underWarranty !== undefined) updateData.under_warranty = updates.underWarranty;
+    if (updates.isWorking !== undefined) updateData.is_working = updates.isWorking;
+    if (updates.serviceCompleted !== undefined) updateData.service_completed = updates.serviceCompleted;
+    if (updates.clientVerified !== undefined) updateData.client_verified = updates.clientVerified;
     
     // Update in Supabase
     const { error } = await supabase
