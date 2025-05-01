@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTickets } from "@/contexts/TicketContext";
+import { useTickets } from "@/contexts/ticket";
 import { useAuth } from "@/contexts/AuthContext";
 import { TicketPriority, TicketStatus, TicketCategory, TicketType, TicketDescriptionType } from "@/types/ticket";
 import { toast } from "sonner";
