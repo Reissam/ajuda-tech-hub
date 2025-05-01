@@ -65,7 +65,8 @@ const NewTicket = () => {
         throw new Error("Usuário não autenticado");
       }
 
-      await addTicket({
+      // Criar objeto de ticket base
+      const ticketData = {
         ticketType,
         ticketDescription,
         // Para gestores/admins, se description estiver vazio, use reportedIssue
@@ -82,10 +83,15 @@ const NewTicket = () => {
         isWorking,
         serviceCompleted,
         clientVerified,
-        arrivalTime,
-        departureTime,
-        serviceDate
-      });
+      };
+
+      // Adicionar campos opcionais somente se forem necessários
+      // Isso evita enviar campos que podem não existir no banco de dados
+      if (arrivalTime) Object.assign(ticketData, { arrivalTime });
+      if (departureTime) Object.assign(ticketData, { departureTime });
+      if (serviceDate) Object.assign(ticketData, { serviceDate });
+
+      await addTicket(ticketData);
 
       toast.success("Chamado aberto com sucesso!");
       navigate("/tickets");

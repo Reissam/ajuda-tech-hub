@@ -74,30 +74,32 @@ export async function createTicket(
   userId: string
 ): Promise<Ticket> {
   try {
+    // Prepare data for insertion, only include fields that exist in the database
+    const insertData: any = {
+      title: ticketData.title,
+      ticket_type: ticketData.ticketType,
+      ticket_description: ticketData.ticketDescription,
+      description: ticketData.description,
+      reported_issue: ticketData.reportedIssue,
+      confirmed_issue: ticketData.confirmedIssue,
+      service_performed: ticketData.servicePerformed,
+      status: ticketData.status,
+      priority: ticketData.priority,
+      category: ticketData.category,
+      created_by: userId,
+      client_id: ticketData.clientId
+    };
+
+    // Only add these fields if they exist in the ticket data
+    if (ticketData.underWarranty !== undefined) insertData.under_warranty = ticketData.underWarranty;
+    if (ticketData.isWorking !== undefined) insertData.is_working = ticketData.isWorking;
+    if (ticketData.serviceCompleted !== undefined) insertData.service_completed = ticketData.serviceCompleted;
+    if (ticketData.clientVerified !== undefined) insertData.client_verified = ticketData.clientVerified;
+    
     // Insert new ticket to Supabase
     const { data, error } = await supabase
       .from('tickets')
-      .insert([{
-        title: ticketData.title,
-        ticket_type: ticketData.ticketType,
-        ticket_description: ticketData.ticketDescription,
-        description: ticketData.description,
-        reported_issue: ticketData.reportedIssue,
-        confirmed_issue: ticketData.confirmedIssue,
-        service_performed: ticketData.servicePerformed,
-        status: ticketData.status,
-        priority: ticketData.priority,
-        category: ticketData.category,
-        created_by: userId,
-        client_id: ticketData.clientId,
-        under_warranty: ticketData.underWarranty,
-        is_working: ticketData.isWorking,
-        service_completed: ticketData.serviceCompleted,
-        client_verified: ticketData.clientVerified,
-        arrival_time: ticketData.arrivalTime,
-        departure_time: ticketData.departureTime,
-        service_date: ticketData.serviceDate
-      }])
+      .insert([insertData])
       .select('*')
       .single();
     
@@ -165,9 +167,6 @@ export async function updateTicketById(
     if (updates.isWorking !== undefined) updateData.is_working = updates.isWorking;
     if (updates.serviceCompleted !== undefined) updateData.service_completed = updates.serviceCompleted;
     if (updates.clientVerified !== undefined) updateData.client_verified = updates.clientVerified;
-    if (updates.arrivalTime !== undefined) updateData.arrival_time = updates.arrivalTime;
-    if (updates.departureTime !== undefined) updateData.departure_time = updates.departureTime;
-    if (updates.serviceDate !== undefined) updateData.service_date = updates.serviceDate;
     
     // Update in Supabase
     const { error } = await supabase
