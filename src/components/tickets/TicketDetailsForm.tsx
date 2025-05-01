@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -261,49 +260,21 @@ export const TicketDetailsForm = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoria</Label>
-              <Select
-                value={category}
-                onValueChange={(value) => setCategory(value as TicketCategory)}
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Selecione a categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TicketCategory.HARDWARE}>Hardware</SelectItem>
-                  <SelectItem value={TicketCategory.SOFTWARE}>Software</SelectItem>
-                  <SelectItem value={TicketCategory.NETWORK}>Rede</SelectItem>
-                  <SelectItem value={TicketCategory.OTHER}>Outro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="priority">Prioridade</Label>
-              <Select
-                value={priority}
-                onValueChange={(value) => setPriority(value as TicketPriority)}
-              >
-                <SelectTrigger id="priority">
-                  <SelectValue placeholder="Selecione a prioridade" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TicketPriority.LOW}>Baixa</SelectItem>
-                  <SelectItem value={TicketPriority.MEDIUM}>Média</SelectItem>
-                  <SelectItem value={TicketPriority.HIGH}>Alta</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="attachments">Anexos (opcional)</Label>
-            <Input id="attachments" type="file" className="cursor-pointer" disabled />
-            <p className="text-sm text-muted-foreground">
-              Você pode anexar capturas de tela ou documentos relevantes (max 5MB por arquivo).
-            </p>
+            <Label htmlFor="priority">Prioridade</Label>
+            <Select
+              value={priority}
+              onValueChange={(value) => setPriority(value as TicketPriority)}
+            >
+              <SelectTrigger id="priority">
+                <SelectValue placeholder="Selecione a prioridade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TicketPriority.LOW}>Baixa</SelectItem>
+                <SelectItem value={TicketPriority.MEDIUM}>Média</SelectItem>
+                <SelectItem value={TicketPriority.HIGH}>Alta</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
 

@@ -23,8 +23,8 @@ export async function fetchTickets(): Promise<Ticket[]> {
     const formattedTickets: Ticket[] = ticketsData.map(ticket => ({
       id: ticket.id,
       title: ticket.title,
-      ticketType: ticket.ticket_type as TicketType || TicketType.PREVENTIVE_MAINTENANCE,
-      ticketDescription: ticket.ticket_description as TicketDescriptionType || TicketDescriptionType.MECHANICAL_LOCK,
+      ticketType: (ticket.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
+      ticketDescription: (ticket.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
       description: ticket.description,
       reportedIssue: ticket.reported_issue,
       confirmedIssue: ticket.confirmed_issue,
@@ -99,8 +99,8 @@ export async function createTicket(
     const newTicket: Ticket = {
       id: data.id,
       title: data.title,
-      ticketType: data.ticket_type as TicketType || TicketType.PREVENTIVE_MAINTENANCE,
-      ticketDescription: data.ticket_description as TicketDescriptionType || TicketDescriptionType.MECHANICAL_LOCK,
+      ticketType: (data.ticket_type as TicketType) || TicketType.PREVENTIVE_MAINTENANCE,
+      ticketDescription: (data.ticket_description as TicketDescriptionType) || TicketDescriptionType.MECHANICAL_LOCK,
       description: data.description,
       reportedIssue: data.reported_issue,
       confirmedIssue: data.confirmed_issue,
