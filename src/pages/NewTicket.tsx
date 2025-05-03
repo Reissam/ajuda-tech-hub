@@ -20,6 +20,7 @@ const NewTicket = () => {
   // Form state
   const [ticketType, setTicketType] = useState<TicketType>(TicketType.PREVENTIVE_MAINTENANCE);
   const [ticketDescription, setTicketDescription] = useState<TicketDescriptionType>(TicketDescriptionType.MECHANICAL_LOCK);
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [reportedIssue, setReportedIssue] = useState("");
   const [confirmedIssue, setConfirmedIssue] = useState("");
@@ -45,15 +46,15 @@ const NewTicket = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validação diferente para gestores/admins - apenas "reportedIssue" obrigatório
+    // Validação incluindo título
     if (isManagerOrAdmin) {
-      if (!reportedIssue || !selectedClient) {
-        toast.error("Por favor, preencha o cliente e o defeito informado");
+      if (!title || !reportedIssue || !selectedClient) {
+        toast.error("Por favor, preencha o título, o cliente e o defeito informado");
         return;
       }
     } else {
-      // Para outros usuários, mantém a validação original
-      if (!description || !selectedClient || !reportedIssue) {
+      // Para outros usuários, mantém a validação original e adiciona título
+      if (!title || !description || !selectedClient || !reportedIssue) {
         toast.error("Por favor, preencha todos os campos obrigatórios");
         return;
       }
@@ -66,9 +67,9 @@ const NewTicket = () => {
       }
 
       const ticketData = {
+        title,
         ticketType,
         ticketDescription,
-        // Para gestores/admins, se description estiver vazio, use reportedIssue
         description: isManagerOrAdmin && !description.trim() ? reportedIssue : description,
         reportedIssue,
         confirmedIssue,
@@ -113,6 +114,20 @@ const NewTicket = () => {
       {selectedClientInfo && (
         <ClientInfoCard client={selectedClientInfo} />
       )}
+
+      {/* Campo de título adicionado */}
+      <div className="mb-4">
+        <label htmlFor="title" className="block font-medium text-sm mb-1">Título do Chamado</label>
+        <input
+          type="text"
+          id="title"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Insira um título para o chamado"
+          required
+        />
+      </div>
 
       <TicketDetailsForm
         ticketType={ticketType}

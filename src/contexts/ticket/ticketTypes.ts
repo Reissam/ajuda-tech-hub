@@ -12,7 +12,7 @@ export interface TicketContextType {
 
 export interface Ticket {
   id: string;
-  title?: string;
+  title: string;
   ticketType: TicketType;
   ticketDescription: TicketDescriptionType;
   description: string;
