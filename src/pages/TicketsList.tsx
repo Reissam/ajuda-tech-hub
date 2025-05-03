@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTickets } from "@/contexts/ticket";
@@ -68,6 +69,13 @@ const TicketsList = () => {
     return true;
   });
 
+  // Função para gerar número de OS baseado no ID
+  const generateOrderNumber = (id: string) => {
+    // Pegar os primeiros 6 caracteres do ID para criar um número de OS
+    const shortId = id.substring(0, 6).toUpperCase();
+    return `OS-${shortId}`;
+  };
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -129,7 +137,7 @@ const TicketsList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">ID</TableHead>
+                  <TableHead className="w-[100px]">Nº de OS</TableHead>
                   <TableHead>Título</TableHead>
                   <TableHead className="hidden md:table-cell">Categoria</TableHead>
                   <TableHead className="hidden md:table-cell">Prioridade</TableHead>
@@ -142,7 +150,7 @@ const TicketsList = () => {
                 {filteredTickets.length > 0 ? (
                   filteredTickets.map((ticket) => (
                     <TableRow key={ticket.id}>
-                      <TableCell className="font-medium">#{ticket.id}</TableCell>
+                      <TableCell className="font-medium">{generateOrderNumber(ticket.id)}</TableCell>
                       <TableCell>{ticket.title}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         <CategoryBadge category={ticket.category} />
