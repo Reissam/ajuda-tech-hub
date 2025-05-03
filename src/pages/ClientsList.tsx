@@ -50,11 +50,11 @@ const ClientsList = () => {
     return true;
   });
 
-  // Gerar número de O.S. baseado no ID
-  const generateOrderNumber = (id: string) => {
-    // Pegar os primeiros 6 caracteres do ID para criar um número de O.S.
+  // Gerar número de ID baseado no ID
+  const generateClientId = (id: string) => {
+    // Pegar os primeiros 6 caracteres do ID para criar um número de ID
     const shortId = id.substring(0, 6).toUpperCase();
-    return `OS-${shortId}`;
+    return `ID-${shortId}`;
   };
 
   return (
@@ -91,7 +91,7 @@ const ClientsList = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nº de O.S.</TableHead>
+                  <TableHead>Nº ID Cliente</TableHead>
                   <TableHead>Nome</TableHead>
                   <TableHead className="hidden md:table-cell">Unidade</TableHead>
                   <TableHead className="hidden md:table-cell">Cidade</TableHead>
@@ -103,7 +103,7 @@ const ClientsList = () => {
                 {filteredClients.length > 0 ? (
                   filteredClients.map((client) => (
                     <TableRow key={client.id}>
-                      <TableCell>{generateOrderNumber(client.id)}</TableCell>
+                      <TableCell>{generateClientId(client.id)}</TableCell>
                       <TableCell>{client.name}</TableCell>
                       <TableCell className="hidden md:table-cell">{client.unit}</TableCell>
                       <TableCell className="hidden md:table-cell">{client.city}</TableCell>
