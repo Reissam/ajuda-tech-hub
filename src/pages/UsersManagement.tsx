@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/types/user";
 import { toast } from "sonner";
@@ -44,8 +44,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface UserData {
   id: string;
@@ -53,67 +53,36 @@ interface UserData {
   email: string;
   role: UserRole;
   active: boolean;
-  createdAt: Date;
+  created_at: Date;
 }
-
-// Mock data for demonstration only
-const MOCK_USERS_DATA: UserData[] = [
-  {
-    id: "2",
-    name: "Técnico Demo",
-    email: "tecnico@demo.com",
-    role: UserRole.TECHNICIAN,
-    active: true,
-    createdAt: new Date("2023-04-18"),
-  },
-  {
-    id: "3",
-    name: "Admin Demo",
-    email: "admin@demo.com",
-    role: UserRole.ADMIN,
-    active: true,
-    createdAt: new Date("2023-04-15"),
-  },
-  {
-    id: "4",
-    name: "Gestor Demo",
-    email: "gestor@demo.com",
-    role: UserRole.MANAGER,
-    active: true,
-    createdAt: new Date("2023-04-15"),
-  },
-  {
-    id: "5",
-    name: "José Silva",
-    email: "jose@exemplo.com",
-    role: UserRole.CLIENT,
-    active: true,
-    createdAt: new Date("2023-03-22"),
-  },
-  {
-    id: "6",
-    name: "Maria Oliveira",
-    email: "maria@exemplo.com",
-    role: UserRole.CLIENT,
-    active: false,
-    createdAt: new Date("2023-03-15"),
-  },
-  {
-    id: "7",
-    name: "Carlos Técnico",
-    email: "carlos@exemplo.com",
-    role: UserRole.TECHNICIAN,
-    active: true,
-    createdAt: new Date("2023-02-10"),
-  },
-];
 
 const UsersManagement = () => {
   const { user } = useAuth();
-  const [users] = useState(MOCK_USERS_DATA);
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch users from Supabase
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+        
+        if (error) {
+          throw error;
+        }
+        
+        return data as UserData[];
+      } catch (error: any) {
+        toast.error(`Erro ao carregar usuários: ${error.message}`);
+        return [];
+      }
+    }
+  });
 
   if (user?.role !== UserRole.ADMIN) {
     return (
@@ -134,7 +103,7 @@ const UsersManagement = () => {
       .toUpperCase();
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -171,7 +140,11 @@ const UsersManagement = () => {
   });
 
   const handleAddUser = () => {
-    toast.info("Funcionalidade de adicionar usu��rio será implementada em breve.");
+    toast.info("Funcionalidade de adicionar usuário será implementada em breve.");
+  };
+
+  const handleEditUser = (userId: string) => {
+    toast.info(`Editar usuário com ID: ${userId}`);
   };
 
   return (
@@ -239,7 +212,13 @@ const UsersManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.length > 0 ? (
+                {isLoadingUsers ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-24 text-center">
+                      Carregando usuários...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
@@ -291,10 +270,14 @@ const UsersManagement = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        {formatDate(user.createdAt)}
+                        {formatDate(user.created_at)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditUser(user.id)}
+                        >
                           Editar
                         </Button>
                       </TableCell>
