@@ -56,15 +56,23 @@ interface UserData {
   created_at: Date;
 }
 
+interface ProfileData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  active?: boolean;
+  created_at: string;
+}
+
 const UsersManagement = () => {
   const { user } = useAuth();
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   // Fetch users from Supabase
-  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+  const { data: profilesData = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ['users'],
     queryFn: async () => {
       try {
@@ -76,13 +84,23 @@ const UsersManagement = () => {
           throw error;
         }
         
-        return data as UserData[];
+        return data as ProfileData[];
       } catch (error: any) {
         toast.error(`Erro ao carregar usuários: ${error.message}`);
         return [];
       }
     }
   });
+
+  // Transform profiles data to match UserData interface
+  const users: UserData[] = profilesData.map(profile => ({
+    id: profile.id,
+    name: profile.name,
+    email: profile.email,
+    role: profile.role as UserRole,
+    active: profile.active !== undefined ? profile.active : true, // Default to true if not specified
+    created_at: new Date(profile.created_at)
+  }));
 
   if (user?.role !== UserRole.ADMIN) {
     return (

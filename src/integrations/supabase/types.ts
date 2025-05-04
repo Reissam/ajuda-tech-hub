@@ -415,6 +415,10 @@ export type Database = {
           total_closed: number
         }[]
       }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
