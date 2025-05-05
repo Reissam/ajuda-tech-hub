@@ -11,6 +11,7 @@ import {
   Trash2,
   UserCog,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,7 +81,8 @@ const UsersManagement = () => {
         console.log("Fetching users from Supabase...");
         const { data, error } = await supabase
           .from('profiles')
-          .select('*');
+          .select('*')
+          .order('name', { ascending: true });
         
         if (error) {
           console.error("Error fetching profiles:", error);
@@ -200,14 +202,29 @@ const UsersManagement = () => {
     }
   };
 
+  const handleRefreshUsers = () => {
+    queryClient.invalidateQueries({ queryKey: ['users'] });
+    toast.info("Atualizando lista de usuários...");
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Gerenciamento de Usuários</h1>
-        <Button onClick={handleAddUser}>
-          <Plus size={16} className="mr-2" />
-          Adicionar Usuário
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefreshUsers} disabled={isLoadingUsers}>
+            {isLoadingUsers ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <ArrowUpDown size={16} className="mr-2" />
+            )}
+            Atualizar
+          </Button>
+          <Button onClick={handleAddUser}>
+            <Plus size={16} className="mr-2" />
+            Adicionar Usuário
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -268,7 +285,10 @@ const UsersManagement = () => {
                 {isLoadingUsers ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center">
-                      Carregando usuários...
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+                        <span>Carregando usuários...</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length > 0 ? (
