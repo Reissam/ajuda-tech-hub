@@ -76,16 +76,20 @@ const UsersManagement = () => {
     queryKey: ['users'],
     queryFn: async () => {
       try {
+        console.log("Fetching users from Supabase...");
         const { data, error } = await supabase
           .from('profiles')
           .select('*');
         
         if (error) {
+          console.error("Error fetching profiles:", error);
           throw error;
         }
         
+        console.log("Profiles data:", data);
         return data as ProfileData[];
       } catch (error: any) {
+        console.error("Error in queryFn:", error);
         toast.error(`Erro ao carregar usuários: ${error.message}`);
         return [];
       }
@@ -95,12 +99,16 @@ const UsersManagement = () => {
   // Transform profiles data to match UserData interface
   const users: UserData[] = profilesData.map(profile => ({
     id: profile.id,
-    name: profile.name,
-    email: profile.email,
-    role: profile.role as UserRole,
+    name: profile.name || 'Sem nome',
+    email: profile.email || 'Sem email',
+    role: (profile.role as UserRole) || UserRole.CLIENT,
     active: profile.active !== undefined ? profile.active : true, // Default to true if not specified
-    created_at: new Date(profile.created_at)
+    created_at: new Date(profile.created_at || new Date())
   }));
+
+  useEffect(() => {
+    console.log("Transformed users:", users);
+  }, [users]);
 
   if (user?.role !== UserRole.ADMIN) {
     return (
@@ -122,11 +130,16 @@ const UsersManagement = () => {
   };
 
   const formatDate = (date: Date | string) => {
-    return new Date(date).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    try {
+      return new Date(date).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Data inválida";
+    }
   };
 
   // Filtrar usuários com base nos filtros e busca
