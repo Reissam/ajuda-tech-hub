@@ -45,7 +45,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface UserData {
   id: string;
@@ -67,6 +67,7 @@ interface ProfileData {
 
 const UsersManagement = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [roleFilter, setRoleFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -93,7 +94,9 @@ const UsersManagement = () => {
         toast.error(`Erro ao carregar usuários: ${error.message}`);
         return [];
       }
-    }
+    },
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Transform profiles data to match UserData interface
@@ -176,6 +179,25 @@ const UsersManagement = () => {
 
   const handleEditUser = (userId: string) => {
     toast.info(`Editar usuário com ID: ${userId}`);
+  };
+
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ active: !currentStatus })
+        .eq('id', userId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success(`Status do usuário atualizado com sucesso!`);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    } catch (error: any) {
+      console.error("Error updating user status:", error);
+      toast.error(`Erro ao atualizar status: ${error.message}`);
+    }
   };
 
   return (
@@ -304,13 +326,24 @@ const UsersManagement = () => {
                         {formatDate(user.created_at)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEditUser(user.id)}
-                        >
-                          Editar
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal size={16} />
+                              <span className="sr-only">Menu</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditUser(user.id)}>
+                              <UserCog className="mr-2 h-4 w-4" />
+                              Editar usuário
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleUserStatus(user.id, user.active)}>
+                              <ShieldCheck className="mr-2 h-4 w-4" />
+                              {user.active ? "Desativar" : "Ativar"} usuário
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))

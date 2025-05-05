@@ -143,6 +143,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active: boolean | null
           address: string | null
           created_at: string | null
           email: string
@@ -153,6 +154,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active?: boolean | null
           address?: string | null
           created_at?: string | null
           email: string
@@ -163,6 +165,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active?: boolean | null
           address?: string | null
           created_at?: string | null
           email?: string
@@ -416,6 +419,10 @@ export type Database = {
         }[]
       }
       is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_user_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
