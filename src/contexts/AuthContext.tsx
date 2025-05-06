@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Não fazemos chamadas ao Supabase dentro do callback
           // Usamos setTimeout para evitar deadlocks
           setTimeout(() => {
-            fetchUserProfile(id, email || "");
+            getOrCreateUserProfile(id, email || "");
           }, 0);
         } else {
           setUser(null);
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       if (session?.user) {
         const { id, email } = session.user;
-        fetchUserProfile(id, email || "");
+        getOrCreateUserProfile(id, email || "");
       }
     });
 
@@ -49,86 +49,114 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Função para buscar o perfil do usuário
-  const fetchUserProfile = async (userId: string, email: string) => {
+  // Função para buscar ou criar perfil do usuário
+  const getOrCreateUserProfile = async (userId: string, email: string) => {
     try {
-      console.log(`Fetching profile for user ${userId} (${email})`);
+      console.log(`Checking profile for user ${userId} (${email})`);
       
-      // Primeiro, tentamos buscar o perfil existente
-      const { data: profile, error } = await supabase
+      // Primeiro tentamos buscar o perfil com .select() em vez de .single()
+      const { data: profiles, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
-        .single();
+        .eq('id', userId);
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-        throw error;
+      if (fetchError) {
+        console.error("Error fetching profiles:", fetchError);
+        throw fetchError;
       }
 
-      // Se o perfil não existe, vamos criar um
-      if (!profile) {
-        console.log(`Profile not found for ${userId}, creating new profile`);
-        
-        // Determinamos o papel com base no email
-        let role = UserRole.CLIENT;
-        let name = email.split('@')[0];
-        
-        if (email.includes("admin")) {
-          role = UserRole.ADMIN;
-          name = "Admin Demo";
-        } else if (email.includes("gestor")) {
-          role = UserRole.MANAGER;
-          name = "Gestor Demo";
-        } else if (email.includes("tecnico")) {
-          role = UserRole.TECHNICIAN;
-          name = "Técnico Demo";
-        }
-
-        // Criamos o perfil
-        const { data: newProfile, error: insertError } = await supabase
-          .from('profiles')
-          .insert([
-            { 
-              id: userId, 
-              email, 
-              name,
-              role
-            }
-          ])
-          .select()
-          .single();
-
-        if (insertError) {
-          throw insertError;
-        }
-
-        console.log("New profile created:", newProfile);
+      // Verifica se encontrou algum perfil
+      if (profiles && profiles.length > 0) {
+        console.log("Profile found:", profiles[0]);
+        const profile = profiles[0];
         
         const userWithProfile: User = {
           id: userId,
           email,
-          name: newProfile.name,
-          role: newProfile.role as UserRole
+          name: profile.name,
+          role: profile.role as UserRole
         };
         
         setUser(userWithProfile);
         return;
       }
       
-      console.log("Profile found:", profile);
+      console.log(`No profile found for ${userId}, creating new profile`);
       
-      // Se encontramos o perfil, usamos os dados dele
-      const userWithProfile: User = {
+      // Determinamos o papel com base no email
+      let role = UserRole.CLIENT;
+      let name = email.split('@')[0];
+      
+      if (email.includes("admin")) {
+        role = UserRole.ADMIN;
+        name = "Admin Demo";
+      } else if (email.includes("gestor")) {
+        role = UserRole.MANAGER;
+        name = "Gestor Demo";
+      } else if (email.includes("tecnico")) {
+        role = UserRole.TECHNICIAN;
+        name = "Técnico Demo";
+      }
+
+      // Criamos o perfil
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([
+          { 
+            id: userId, 
+            email, 
+            name,
+            role
+          }
+        ])
+        .select();
+
+      if (insertError) {
+        console.error("Error creating profile:", insertError);
+        // Em vez de lançar o erro, criamos um usuário manualmente para permitir o login
+        const fallbackUser: User = {
+          id: userId,
+          email,
+          name,
+          role
+        };
+        setUser(fallbackUser);
+        toast.error("Erro ao criar perfil, mas você pode continuar usando o aplicativo");
+        return;
+      }
+
+      if (newProfile && newProfile.length > 0) {
+        console.log("New profile created:", newProfile[0]);
+        
+        const userWithProfile: User = {
+          id: userId,
+          email,
+          name: newProfile[0].name,
+          role: newProfile[0].role as UserRole
+        };
+        
+        setUser(userWithProfile);
+      } else {
+        // Caso de fallback
+        const fallbackUser: User = {
+          id: userId,
+          email,
+          name,
+          role
+        };
+        setUser(fallbackUser);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar/criar perfil:", error);
+      // Em caso de erro, criamos um usuário manualmente para permitir o login
+      const fallbackUser: User = {
         id: userId,
         email,
-        name: profile.name,
-        role: profile.role as UserRole
+        name: email.includes("admin") ? "Admin Demo" : email.split('@')[0],
+        role: email.includes("admin") ? UserRole.ADMIN : UserRole.CLIENT
       };
-      
-      setUser(userWithProfile);
-    } catch (error) {
-      console.error("Erro ao buscar perfil:", error);
-      toast.error("Erro ao carregar dados do usuário");
+      setUser(fallbackUser);
+      toast.error("Erro ao carregar dados do usuário, mas você pode continuar usando o aplicativo");
     }
   };
 
