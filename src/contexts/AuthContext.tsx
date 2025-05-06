@@ -16,7 +16,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Configurar o listener para mudanças de autenticação PRIMEIRO
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.email);
         setSession(session);
         
         if (session?.user) {
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // DEPOIS verificamos a sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Getting existing session:", session?.user?.email);
       setSession(session);
       
       if (session?.user) {
@@ -50,27 +52,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Função para buscar o perfil do usuário
   const fetchUserProfile = async (userId: string, email: string) => {
     try {
-      // Por enquanto, como não temos uma tabela de perfis configurada no Supabase,
-      // vamos retornar um perfil baseado no email
-      let role = UserRole.TECHNICIAN;
-      let name = "Usuário";
+      console.log(`Fetching profile for user ${userId} (${email})`);
       
-      if (email.includes("admin")) {
-        role = UserRole.ADMIN;
-        name = "Admin Demo";
-      } else if (email.includes("gestor")) {
-        role = UserRole.MANAGER;
-        name = "Gestor Demo";
-      } else if (email.includes("tecnico")) {
-        role = UserRole.TECHNICIAN;
-        name = "Técnico Demo";
+      // Primeiro, tentamos buscar o perfil existente
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+        throw error;
       }
 
+      // Se o perfil não existe, vamos criar um
+      if (!profile) {
+        console.log(`Profile not found for ${userId}, creating new profile`);
+        
+        // Determinamos o papel com base no email
+        let role = UserRole.CLIENT;
+        let name = email.split('@')[0];
+        
+        if (email.includes("admin")) {
+          role = UserRole.ADMIN;
+          name = "Admin Demo";
+        } else if (email.includes("gestor")) {
+          role = UserRole.MANAGER;
+          name = "Gestor Demo";
+        } else if (email.includes("tecnico")) {
+          role = UserRole.TECHNICIAN;
+          name = "Técnico Demo";
+        }
+
+        // Criamos o perfil
+        const { data: newProfile, error: insertError } = await supabase
+          .from('profiles')
+          .insert([
+            { 
+              id: userId, 
+              email, 
+              name,
+              role
+            }
+          ])
+          .select()
+          .single();
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        console.log("New profile created:", newProfile);
+        
+        const userWithProfile: User = {
+          id: userId,
+          email,
+          name: newProfile.name,
+          role: newProfile.role as UserRole
+        };
+        
+        setUser(userWithProfile);
+        return;
+      }
+      
+      console.log("Profile found:", profile);
+      
+      // Se encontramos o perfil, usamos os dados dele
       const userWithProfile: User = {
         id: userId,
         email,
-        name,
-        role
+        name: profile.name,
+        role: profile.role as UserRole
       };
       
       setUser(userWithProfile);

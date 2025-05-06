@@ -12,6 +12,7 @@ import {
   UserCog,
   ShieldCheck,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,18 +80,59 @@ const UsersManagement = () => {
     queryFn: async () => {
       try {
         console.log("Fetching users from Supabase...");
-        const { data, error } = await supabase
+        
+        // Primeiro, verifica se existem perfis
+        const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('*')
           .order('name', { ascending: true });
         
-        if (error) {
-          console.error("Error fetching profiles:", error);
-          throw error;
+        if (profilesError) {
+          console.error("Error fetching profiles:", profilesError);
+          throw profilesError;
         }
         
-        console.log("Profiles data:", data);
-        return data as ProfileData[];
+        console.log("Profiles found:", profiles?.length || 0);
+        console.log("Profiles data:", profiles);
+        
+        // Se não há perfis, tenta buscar usuários da auth e criar perfis para eles
+        if (!profiles || profiles.length === 0) {
+          console.log("No profiles found, trying to fetch auth users and create profiles");
+          
+          // Buscar informações do usuário atual para determinar se é admin
+          const { data: currentUserData } = await supabase.auth.getUser();
+          const currentUser = currentUserData?.user;
+          
+          if (currentUser && currentUser.email?.includes('admin')) {
+            console.log("Current user is admin, creating profiles for auth users");
+            
+            // Apenas para debug - na prática, seria ideal usar uma função do Supabase para isto
+            const dummyProfiles = [
+              {
+                id: currentUser.id,
+                name: 'Admin Demo',
+                email: currentUser.email,
+                role: 'admin',
+                active: true,
+                created_at: new Date().toISOString()
+              }
+            ];
+            
+            // Criar perfil para o usuário admin atual
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert(dummyProfiles);
+              
+            if (insertError) {
+              console.error("Error creating profile for admin:", insertError);
+            } else {
+              console.log("Created profile for admin user");
+              return dummyProfiles as ProfileData[];
+            }
+          }
+        }
+        
+        return profiles as ProfileData[];
       } catch (error: any) {
         console.error("Error in queryFn:", error);
         toast.error(`Erro ao carregar usuários: ${error.message}`);
