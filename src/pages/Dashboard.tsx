@@ -32,7 +32,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { tickets } = useTickets();
 
-  // Dados para o dashboard do cliente
+  // Data for client dashboard
   const clientTicketsByStatus = [
     {
       name: "Abertos",
@@ -56,7 +56,7 @@ const Dashboard = () => {
     },
   ];
 
-  // Dados para o dashboard do técnico
+  // Data for technician dashboard
   const technicianTicketsByPriority = [
     {
       name: "Alta",
@@ -78,7 +78,7 @@ const Dashboard = () => {
     },
   ];
 
-  // Dados para o dashboard do administrador
+  // Data for admin dashboard
   const ticketsByStatusAdmin = [
     {
       name: "Abertos",
@@ -94,7 +94,7 @@ const Dashboard = () => {
     },
   ];
 
-  // Dados de tendência de chamados por dia (simulado)
+  // Ticket trend data
   const ticketsTrend = [
     { date: "Seg", count: 5 },
     { date: "Ter", count: 8 },
@@ -105,7 +105,7 @@ const Dashboard = () => {
     { date: "Dom", count: 1 },
   ];
 
-  // Configuração dos gráficos
+  // Chart configuration
   const chartConfig = {
     open: {
       label: "Abertos",
@@ -137,13 +137,16 @@ const Dashboard = () => {
     },
   };
 
+  // Check if the user is a technician
+  const isTechnician = user?.role === UserRole.TECHNICIAN;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
       </div>
 
-      {/* Resumo de Chamados */}
+      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -206,12 +209,12 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Mostrar lista de chamados abertos para técnicos */}
-      {user?.role === UserRole.TECHNICIAN && user?.id && (
+      {/* TechnicianOpenTickets component for technicians */}
+      {isTechnician && user?.id && (
         <TechnicianOpenTickets userId={user.id} />
       )}
 
-      {/* Gráficos específicos por perfil */}
+      {/* Specific charts by user role */}
       {user?.role === UserRole.CLIENT && (
         <Card className="col-span-3">
           <CardHeader>

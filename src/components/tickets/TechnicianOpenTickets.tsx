@@ -27,12 +27,23 @@ const TechnicianOpenTickets = ({ userId }: { userId: string }) => {
   const { tickets, updateTicket } = useTickets();
   const navigate = useNavigate();
   
+  console.log("Technician ID:", userId);
+  console.log("All tickets:", tickets);
+  
   // Filter tickets assigned to this technician and that are open or in progress
   const assignedOpenTickets = tickets.filter(
-    (ticket) => 
-      ticket.assignedTo === userId && 
-      (ticket.status === TicketStatus.OPEN || ticket.status === TicketStatus.IN_PROGRESS)
+    (ticket) => {
+      const isAssigned = ticket.assignedTo === userId;
+      const isOpenOrInProgress = ticket.status === TicketStatus.OPEN || 
+                                 ticket.status === TicketStatus.IN_PROGRESS;
+      
+      console.log(`Ticket ${ticket.id}: Assigned=${isAssigned}, Status=${ticket.status}, Open/InProgress=${isOpenOrInProgress}`);
+      
+      return isAssigned && isOpenOrInProgress;
+    }
   );
+  
+  console.log("Filtered tickets for technician:", assignedOpenTickets);
 
   const [ticketStatuses, setTicketStatuses] = useState<Record<string, TicketStatus>>(
     assignedOpenTickets.reduce((acc, ticket) => {
@@ -42,9 +53,11 @@ const TechnicianOpenTickets = ({ userId }: { userId: string }) => {
   );
 
   const handleStatusChange = async (ticketId: string, status: TicketStatus) => {
+    console.log(`Updating ticket ${ticketId} status to ${status}`);
     setTicketStatuses(prev => ({ ...prev, [ticketId]: status }));
     try {
       await updateTicket(ticketId, { status });
+      console.log("Status updated successfully");
     } catch (error) {
       console.error("Failed to update ticket status:", error);
     }
