@@ -1,15 +1,6 @@
 
 import { TicketStatus, TicketPriority, TicketCategory, TicketType, TicketDescriptionType } from "@/types/ticket";
 
-export interface TicketContextType {
-  tickets: Ticket[];
-  addTicket: (ticket: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "comments">) => Promise<void>;
-  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
-  getTicketById: (id: string) => Ticket | undefined;
-  assignTicket: (ticketId: string, technicianId: string) => Promise<void>;
-  addComment: (ticketId: string, content: string, attachments?: string[]) => Promise<void>;
-}
-
 export interface Ticket {
   id: string;
   title: string;
@@ -27,7 +18,6 @@ export interface Ticket {
   createdBy: string;
   assignedTo?: string;
   clientId: string;
-  comments?: TicketComment[];
   underWarranty?: boolean;
   isWorking?: boolean;
   serviceCompleted?: boolean;
@@ -35,6 +25,7 @@ export interface Ticket {
   arrivalTime?: string;
   departureTime?: string;
   serviceDate?: Date;
+  comments?: TicketComment[];
 }
 
 export interface TicketComment {
@@ -43,4 +34,13 @@ export interface TicketComment {
   createdAt: Date;
   createdBy: string;
   attachments?: string[];
+}
+
+export interface TicketContextType {
+  tickets: Ticket[];
+  addTicket: (ticketData: Omit<Ticket, "id" | "createdAt" | "updatedAt" | "comments">) => Promise<void>;
+  updateTicket: (id: string, updates: Partial<Ticket>) => Promise<void>;
+  getTicketById: (id: string) => Ticket | undefined;
+  assignTicket: (ticketId: string, technicianId: string) => Promise<void>;
+  addComment: (ticketId: string, content: string, attachments?: string[]) => Promise<void>;
 }

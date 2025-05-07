@@ -1,6 +1,6 @@
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useTickets } from "@/contexts/ticket"; // Updated import path
+import { useTickets } from "@/contexts/ticket"; 
 import { UserRole } from "@/types/user";
 import { TicketStatus, TicketPriority } from "@/types/ticket";
 import {
@@ -26,6 +26,7 @@ import {
   Line
 } from "recharts";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import TechnicianOpenTickets from "@/components/tickets/TechnicianOpenTickets";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -204,6 +205,11 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Mostrar lista de chamados abertos para técnicos */}
+      {user?.role === UserRole.TECHNICIAN && user?.id && (
+        <TechnicianOpenTickets userId={user.id} />
+      )}
 
       {/* Gráficos específicos por perfil */}
       {user?.role === UserRole.CLIENT && (
